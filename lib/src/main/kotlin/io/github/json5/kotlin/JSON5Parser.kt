@@ -13,6 +13,18 @@ internal object JSON5Parser {
      * @throws JSON5Exception if the input is invalid JSON5
      */
     fun parse(text: String): Any? {
+        return parse(text, null)
+    }
+
+    /**
+     * Parses a JSON5 string into a Kotlin object, with a reviver function.
+     *
+     * @param text JSON5 text to parse
+     * @param reviver A function that transforms the parsed values, or null for no transformation
+     * @return The parsed value (Map, List, String, Number, Boolean, or null)
+     * @throws JSON5Exception if the input is invalid JSON5
+     */
+    fun parse(text: String, reviver: ((key: String, value: Any?) -> Any?)? = null): Any? {
         val lexer = JSON5Lexer(text)
         var token = lexer.nextToken()
 
@@ -29,7 +41,59 @@ internal object JSON5Parser {
             throw JSON5Exception("Unexpected additional content after JSON5 value", token.line, token.column)
         }
 
-        return result
+        // Apply the reviver function if provided
+        return if (reviver != null) {
+            internalize(mapOf("" to result), "", reviver)
+        } else {
+            result
+        }
+    }
+
+    private fun internalize(holder: Map<String, Any?>, name: String, reviver: (key: String, value: Any?) -> Any?): Any? {
+        val value = holder[name]
+
+        // Process objects and arrays recursively
+        if (value != null) {
+            when (value) {
+                is Map<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val map = value as Map<String, Any?>
+                    val mutableMap = map.toMutableMap()
+
+                    for (key in map.keys) {
+                        val replacement = internalize(map, key, reviver)
+                        if (replacement == null && replacement !== map[key]) {
+                            mutableMap.remove(key)
+                        } else if (replacement !== map[key]) {
+                            mutableMap[key] = replacement
+                        }
+                    }
+
+                    return reviver(name, mutableMap)
+                }
+                is List<*> -> {
+                    val list = value
+                    val mutableList = list.toMutableList()
+
+                    for (i in list.indices) {
+                        val key = i.toString()
+                        val tempHolder = mapOf(key to list[i])
+                        val replacement = internalize(tempHolder, key, reviver)
+
+                        if (replacement == null && list[i] != null) {
+                            mutableList[i] = null
+                        } else if (replacement !== list[i]) {
+                            mutableList[i] = replacement
+                        }
+                    }
+
+                    return reviver(name, mutableList)
+                }
+                else -> return reviver(name, value)
+            }
+        }
+
+        return reviver(name, value)
     }
 
     private fun parseValue(token: Token, lexer: JSON5Lexer): Any? {
