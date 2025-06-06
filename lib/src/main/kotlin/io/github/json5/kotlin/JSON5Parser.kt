@@ -1,7 +1,8 @@
 package io.github.json5.kotlin
 
 /**
- * JSON5Parser is responsible for parsing JSON5 text into Kotlin objects.
+ * Parser for JSON5 syntax
+ * Converts JSON5 text into Kotlin objects
  */
 internal object JSON5Parser {
     /**
@@ -12,7 +13,132 @@ internal object JSON5Parser {
      * @throws JSON5Exception if the input is invalid JSON5
      */
     fun parse(text: String): Any? {
-        // Initially just throw an exception - we'll implement this through TDD
-        throw NotImplementedError("JSON5 parser not yet implemented")
+        val lexer = JSON5Lexer(text)
+        var token = lexer.nextToken()
+
+        // Handle empty input
+        if (token.type == TokenType.EOF) {
+            throw JSON5Exception("Empty JSON5 input", token.line, token.column)
+        }
+
+        val result = parseValue(token, lexer)
+
+        // Check that there's no extra content after the JSON5 value
+        token = lexer.nextToken()
+        if (token.type != TokenType.EOF) {
+            throw JSON5Exception("Unexpected additional content after JSON5 value", token.line, token.column)
+        }
+
+        return result
+    }
+
+    private fun parseValue(token: Token, lexer: JSON5Lexer): Any? {
+        return when (token.type) {
+            TokenType.NULL -> null
+            TokenType.BOOLEAN -> (token as Token.BooleanToken).boolValue
+            TokenType.STRING -> (token as Token.StringToken).stringValue
+            TokenType.NUMERIC -> (token as Token.NumericToken).numberValue
+            TokenType.PUNCTUATOR -> {
+                when ((token as Token.PunctuatorToken).punctuator) {
+                    "{" -> parseObject(lexer)
+                    "[" -> parseArray(lexer)
+                    else -> throw JSON5Exception("Unexpected punctuator: ${token.punctuator}", token.line, token.column)
+                }
+            }
+            TokenType.IDENTIFIER -> throw JSON5Exception("Unexpected identifier: ${(token as Token.IdentifierToken).identifierValue}", token.line, token.column)
+            TokenType.EOF -> throw JSON5Exception("Unexpected end of input", token.line, token.column)
+        }
+    }
+
+    private fun parseObject(lexer: JSON5Lexer): Map<String, Any?> {
+        val result = mutableMapOf<String, Any?>()
+        var token = lexer.nextToken()
+
+        // Handle empty object
+        if (token.type == TokenType.PUNCTUATOR && (token as Token.PunctuatorToken).punctuator == "}") {
+            return result
+        }
+
+        while (true) {
+            // Parse the property name
+            val key = when (token.type) {
+                TokenType.STRING -> (token as Token.StringToken).stringValue
+                TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
+                else -> throw JSON5Exception("Expected property name", token.line, token.column)
+            }
+
+            // Expect a colon
+            token = lexer.nextToken()
+            if (token.type != TokenType.PUNCTUATOR || (token as Token.PunctuatorToken).punctuator != ":") {
+                throw JSON5Exception("Expected ':' after property name", token.line, token.column)
+            }
+
+            // Parse the property value
+            token = lexer.nextToken()
+            val value = parseValue(token, lexer)
+
+            // Add the property to the object
+            result[key] = value
+
+            // Expect a comma or closing brace
+            token = lexer.nextToken()
+            if (token.type == TokenType.PUNCTUATOR) {
+                token as Token.PunctuatorToken
+                if (token.punctuator == "}") {
+                    break
+                } else if (token.punctuator != ",") {
+                    throw JSON5Exception("Expected ',' or '}'", token.line, token.column)
+                }
+            } else {
+                throw JSON5Exception("Expected ',' or '}'", token.line, token.column)
+            }
+
+            // After a comma, parse the next property or handle trailing comma
+            token = lexer.nextToken()
+            if (token.type == TokenType.PUNCTUATOR && (token as Token.PunctuatorToken).punctuator == "}") {
+                break // Allow trailing comma
+            }
+        }
+
+        return result
+    }
+
+    private fun parseArray(lexer: JSON5Lexer): List<Any?> {
+        val result = mutableListOf<Any?>()
+        var token = lexer.nextToken()
+
+        // Handle empty array
+        if (token.type == TokenType.PUNCTUATOR && (token as Token.PunctuatorToken).punctuator == "]") {
+            return result
+        }
+
+        while (true) {
+            // Parse the element value
+            val value = parseValue(token, lexer)
+
+            // Add the element to the array
+            result.add(value)
+
+            // Expect a comma or closing bracket
+            token = lexer.nextToken()
+            if (token.type == TokenType.PUNCTUATOR) {
+                token as Token.PunctuatorToken
+                if (token.punctuator == "]") {
+                    break
+                } else if (token.punctuator != ",") {
+                    throw JSON5Exception("Expected ',' or ']'", token.line, token.column)
+                }
+            } else {
+                throw JSON5Exception("Expected ',' or ']'", token.line, token.column)
+            }
+
+            // After a comma, parse the next element or handle trailing comma
+            token = lexer.nextToken()
+            if (token.type == TokenType.PUNCTUATOR && (token as Token.PunctuatorToken).punctuator == "]") {
+                break // Allow trailing comma
+            }
+        }
+
+        return result
     }
 }
