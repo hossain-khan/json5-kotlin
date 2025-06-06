@@ -1,3 +1,6 @@
 [submodule "json5"]
 	path = json5
 	url = https://github.com/json5/json5.git
+[submodule "json5-spec"]
+	path = json5-spec
+	url = https://github.com/json5/json5-spec.git
