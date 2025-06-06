@@ -1,0 +1,3 @@
+[submodule "json5"]
+	path = json5
+	url = https://github.com/json5/json5.git
