@@ -21,6 +21,5 @@ plugins {
 // Learn more about structuring projects with Gradle - https://docs.gradle.org/8.7/userguide/multi_project_builds.html
 include(":app")
 include(":lib")
-include(":utils")
 
 rootProject.name = "json5-kotlin"
