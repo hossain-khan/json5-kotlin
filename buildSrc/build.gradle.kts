@@ -5,11 +5,20 @@ plugins {
     `kotlin-dsl`
 }
 
-kotlin {
-    jvmToolchain(21) // Changed from 23 to 21
-}
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
+//kotlin {
+//    // Correct way to set the JVM toolchain language version using the Kotlin extension
+//    // Ensure you have the necessary Kotlin plugin version that supports this
+//    (this as org.gradle.api.plugins.ExtensionAware).extensions.configure<KotlinJvmProjectExtension>("kotlin") {
+//        jvmToolchain {
+//            (this as org.gradle.jvm.toolchain.JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(21))
+//        }
+//    }
+//}
+//
 dependencies {
     // Add a dependency on the Kotlin Gradle plugin, so that convention plugins can apply it.
-    implementation(libs.kotlinGradlePlugin)
+    implementation(libs.kotlinGradlePlugin) // libs might not be available if version catalog in buildSrc/settings.gradle.kts is also commented out
 }
