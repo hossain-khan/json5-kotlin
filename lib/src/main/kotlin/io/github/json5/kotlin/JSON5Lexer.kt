@@ -1,5 +1,7 @@
 package io.github.json5.kotlin
 
+import kotlin.math.pow
+
 /**
  * Lexer for JSON5 syntax
  * Breaks JSON5 text into tokens for the parser
@@ -53,12 +55,67 @@ class JSON5Lexer(private val source: String) {
                     }
                     // Not Infinity/NaN, revert and continue with normal number parsing
                     pos -= 1
+                    column -= 1
                     currentChar = sign
                 }
                 readNumber()
             }
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.' -> readNumber()
-            '\\' -> readEscapedIdentifier()
+            '\\' -> {
+                // Handle Unicode escape sequences in identifiers
+                val startColumn = column
+                advance() // Skip the backslash
+
+                if (currentChar != 'u') {
+                    throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
+                }
+
+                advance() // Skip 'u'
+                val hexDigits = StringBuilder()
+                repeat(4) {
+                    if (currentChar == null || !currentChar!!.isHexDigit()) {
+                        throw JSON5Exception("Invalid hex escape sequence in identifier", line, column)
+                    }
+                    hexDigits.append(currentChar)
+                    advance()
+                }
+
+                val char = hexDigits.toString().toInt(16).toChar()
+                if (!isIdentifierStart(char)) {
+                    throw JSON5Exception("Invalid identifier character", line, startColumn)
+                }
+
+                val buffer = StringBuilder().append(char)
+
+                // Continue reading the rest of the identifier
+                while (true) {
+                    if (currentChar == '\\') {
+                        advance() // Skip backslash
+                        if (currentChar != 'u') {
+                            throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
+                        }
+                        advance() // Skip 'u'
+
+                        val identHexDigits = StringBuilder()
+                        repeat(4) {
+                            if (currentChar == null || !currentChar!!.isHexDigit()) {
+                                throw JSON5Exception("Invalid hex escape sequence in identifier", line, column)
+                            }
+                            identHexDigits.append(currentChar)
+                            advance()
+                        }
+
+                        buffer.append(identHexDigits.toString().toInt(16).toChar())
+                    } else if (currentChar != null && isIdentifierPart(currentChar)) {
+                        buffer.append(currentChar)
+                        advance()
+                    } else {
+                        break
+                    }
+                }
+
+                return Token.IdentifierToken(buffer.toString(), line, startColumn)
+            }
             else -> {
                 if (isIdentifierStart(currentChar)) {
                     readIdentifier()
@@ -67,45 +124,6 @@ class JSON5Lexer(private val source: String) {
                 }
             }
         }
-    }
-
-    private fun readEscapedIdentifier(): Token {
-        val startColumn = column
-        advance() // Skip the backslash
-
-        // Handle Unicode escapes in identifiers
-        if (currentChar != 'u') {
-            throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
-        }
-
-        advance() // Skip the 'u'
-        val c = readHexEscape(4)
-
-        // Check if valid identifier start
-        if (!isIdentifierStart(c)) {
-            throw JSON5Exception("Invalid identifier character", line, column)
-        }
-
-        val buffer = StringBuilder().append(c)
-
-        // Continue reading the rest of the identifier
-        while (true) {
-            if (currentChar == '\\') {
-                advance() // Skip backslash
-                if (currentChar != 'u') {
-                    throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
-                }
-                advance() // Skip 'u'
-                buffer.append(readHexEscape(4))
-            } else if (currentChar != null && isIdentifierPart(currentChar)) {
-                buffer.append(currentChar)
-                advance()
-            } else {
-                break
-            }
-        }
-
-        return Token.IdentifierToken(buffer.toString(), line, startColumn)
     }
 
     private fun isIdentifierStart(c: Char?): Boolean {
@@ -214,43 +232,77 @@ class JSON5Lexer(private val source: String) {
     }
 
     private fun readEscapeSequence(): Char {
-        return when (currentChar) {
-            'b' -> { advance(); '\b' }
-            'f' -> { advance(); '\u000C' }
-            'n' -> { advance(); '\n' }
-            'r' -> { advance(); '\r' }
-            't' -> { advance(); '\t' }
-            'v' -> { advance(); '\u000B' }
-            '0' -> { advance(); '\u0000' }
-            '\\' -> { advance(); '\\' }
-            '\'' -> { advance(); '\'' }
-            '"' -> { advance(); '"' }
-            'a' -> { advance(); '\u0007' } // Bell character
+        when (currentChar) {
+            'b' -> {
+                advance()
+                return '\b'
+            }
+            'f' -> {
+                advance()
+                return '\u000C'
+            }
+            'n' -> {
+                advance()
+                return '\n'
+            }
+            'r' -> {
+                advance()
+                return '\r'
+            }
+            't' -> {
+                advance()
+                return '\t'
+            }
+            'v' -> {
+                advance()
+                return '\u000B'
+            }
+            '0' -> {
+                advance()
+                return '\u0000'
+            }
+            '\\' -> {
+                advance()
+                return '\\'
+            }
+            '\'' -> {
+                advance()
+                return '\''
+            }
+            '"' -> {
+                advance()
+                return '"'
+            }
+            'a' -> {
+                advance()
+                return '\u0007' // Bell character
+            }
             '\n' -> {
                 advance()
-                return ' ' // Line continuation returns nothing visible
+                return '\u0000' // Line continuation returns nothing visible
             }
             '\r' -> {
                 advance()
                 if (currentChar == '\n') advance()
-                return ' ' // Line continuation returns nothing visible
+                return '\u0000' // Line continuation returns nothing visible
             }
             '\u2028', '\u2029' -> {
                 advance()
-                return ' ' // Line continuation with line/paragraph separator
+                return '\u0000' // Line continuation with line/paragraph separator
             }
             'x' -> {
                 advance()
-                readHexEscape(2)
+                return readHexEscape(2)
             }
             'u' -> {
                 advance()
-                readHexEscape(4)
+                return readHexEscape(4)
             }
             else -> {
+                // Just return the character after the backslash (e.g. for \', \", etc.)
                 val c = currentChar
                 advance()
-                c ?: throw JSON5Exception("Invalid escape sequence", line, column)
+                return c ?: throw JSON5Exception("Invalid escape sequence", line, column)
             }
         }
     }
@@ -428,11 +480,25 @@ class JSON5Lexer(private val source: String) {
     }
 
     private fun parseHexToDouble(hexStr: String): Double {
-        var result = 0.0
-        for (c in hexStr) {
-            result = result * 16 + c.digitToInt(16)
+        // For very large hex numbers, we need to use a manual approach that mimics JavaScript
+        // behavior to ensure consistent results across platforms
+
+        // If the hex string is too long, we need to process it carefully to avoid precision issues
+        if (hexStr.length > 12) {
+            // Parse the hex string in chunks to avoid overflow
+            val upperHex = hexStr.substring(0, hexStr.length - 8)
+            val lowerHex = hexStr.substring(hexStr.length - 8)
+
+            // Convert each chunk to a double and combine them
+            val upperValue = upperHex.toULong(16).toDouble()
+            val lowerValue = lowerHex.toULong(16).toDouble()
+
+            // Combine the chunks (upper * 2^32 + lower)
+            return upperValue * 2.0.pow(32) + lowerValue
         }
-        return result
+
+        // For shorter hex strings, direct conversion works fine
+        return hexStr.toULong(16).toDouble()
     }
 
     private fun readIdentifier(): Token {
@@ -445,5 +511,21 @@ class JSON5Lexer(private val source: String) {
         }
 
         return Token.IdentifierToken(buffer.toString(), line, startColumn)
+    }
+
+    private fun readHexEscape(digits: Int): Char {
+        val hexString = StringBuilder()
+        repeat(digits) {
+            if (currentChar == null || !currentChar!!.isHexDigit()) {
+                throw JSON5Exception("Invalid hex escape sequence", line, column)
+            }
+            hexString.append(currentChar)
+            advance()
+        }
+        return hexString.toString().toInt(16).toChar()
+    }
+
+    private fun Char.isHexDigit(): Boolean {
+        return this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
     }
 }

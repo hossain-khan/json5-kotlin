@@ -65,7 +65,7 @@ class JSON5ParseTest {
 
     @Test
     fun `should parse special character property names`() {
-        JSON5.parse("""{\$\_:1,_$:2,a\u200C:3}""") shouldBe mapOf("\$_" to 1.0, "_$" to 2.0, "a\u200C" to 3.0)
+        JSON5.parse("""{\${"$"}_:1,_\$:2,a\u200C:3}""") shouldBe mapOf("\$_" to 1.0, "_$" to 2.0, "a\u200C" to 3.0)
     }
 
     @Test
@@ -75,6 +75,7 @@ class JSON5ParseTest {
 
     @Test
     fun `should parse escaped property names`() {
+        // Note: We need a single backslash in the input JSON5 text
         JSON5.parse("""{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}""") shouldBe mapOf("ab" to 1.0, "\$_" to 2.0, "_$" to 3.0)
     }
 
