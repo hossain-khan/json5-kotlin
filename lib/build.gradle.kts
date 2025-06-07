@@ -1,6 +1,7 @@
 plugins {
     // Apply the shared build logic from a convention plugin.
     id("buildsrc.convention.kotlin-jvm")
+    alias(libs.plugins.kover)
     alias(libs.plugins.kotlinPluginSerialization)
 }
 
