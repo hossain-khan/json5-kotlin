@@ -103,7 +103,7 @@ internal object JSON5Serializer {
 
             // Check for circular references
             if (stack.any { it === obj }) {
-                throw JSON5Exception("Converting circular structure to JSON5")
+                throw JSON5Exception("Converting circular structure to JSON5", 0, 0)
             }
 
             stack.add(obj)
@@ -175,7 +175,7 @@ internal object JSON5Serializer {
 
             // Check for circular references
             if (stack.any { it === array }) {
-                throw JSON5Exception("Converting circular structure to JSON5")
+                throw JSON5Exception("Converting circular structure to JSON5", 0, 0)
             }
 
             stack.add(array)

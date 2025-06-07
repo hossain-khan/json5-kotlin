@@ -67,14 +67,14 @@ class JSON5Lexer(private val source: String) {
                 advance() // Skip the backslash
 
                 if (currentChar != 'u') {
-                    throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
+                    throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                 }
 
-                advance() // Skip 'u'
+                advance() // Skip the 'u'
                 val hexDigits = StringBuilder()
                 repeat(4) {
                     if (currentChar == null || !currentChar!!.isHexDigit()) {
-                        throw JSON5Exception("Invalid hex escape sequence in identifier", line, column)
+                        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                     }
                     hexDigits.append(currentChar)
                     advance()
@@ -82,7 +82,7 @@ class JSON5Lexer(private val source: String) {
 
                 val char = hexDigits.toString().toInt(16).toChar()
                 if (!isIdentifierStart(char)) {
-                    throw JSON5Exception("Invalid identifier character", line, startColumn)
+                    throw JSON5Exception.invalidIdentifierChar(line, startColumn)
                 }
 
                 val buffer = StringBuilder().append(char)
@@ -92,14 +92,14 @@ class JSON5Lexer(private val source: String) {
                     if (currentChar == '\\') {
                         advance() // Skip backslash
                         if (currentChar != 'u') {
-                            throw JSON5Exception("Expected 'u' after backslash in identifier", line, column)
+                            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                         }
                         advance() // Skip 'u'
 
                         val identHexDigits = StringBuilder()
                         repeat(4) {
                             if (currentChar == null || !currentChar!!.isHexDigit()) {
-                                throw JSON5Exception("Invalid hex escape sequence in identifier", line, column)
+                                throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                             }
                             identHexDigits.append(currentChar)
                             advance()
@@ -116,11 +116,18 @@ class JSON5Lexer(private val source: String) {
 
                 return Token.IdentifierToken(buffer.toString(), line, startColumn)
             }
+            '/' -> {
+                // Handle incomplete comments
+                if (peek() == null) {
+                    throw JSON5Exception.invalidChar('/', line, column)
+                }
+                throw JSON5Exception.invalidChar(peek() ?: ' ', line, column + 1)
+            }
             else -> {
                 if (isIdentifierStart(currentChar)) {
                     readIdentifier()
                 } else {
-                    throw JSON5Exception("Unexpected character: $currentChar", line, column)
+                    throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                 }
             }
         }
@@ -200,6 +207,7 @@ class JSON5Lexer(private val source: String) {
 
     private fun readString(): Token.StringToken {
         val startColumn = column
+        val startLine = line
         val quoteChar = currentChar
         advance() // Skip the quote character
 
@@ -216,7 +224,7 @@ class JSON5Lexer(private val source: String) {
                     advance() // Skip the backslash
                     buffer.append(readEscapeSequence())
                 }
-                '\n', '\r' -> throw JSON5Exception("Unterminated string", line, startColumn)
+                '\n', '\r' -> throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                 else -> {
                     buffer.append(currentChar)
                     advance()
@@ -225,7 +233,7 @@ class JSON5Lexer(private val source: String) {
         }
 
         if (!done) {
-            throw JSON5Exception("Unterminated string", line, startColumn)
+            throw JSON5Exception.invalidEndOfInput(startLine, startColumn)
         }
 
         return Token.StringToken(buffer.toString(), line, startColumn)
@@ -292,17 +300,33 @@ class JSON5Lexer(private val source: String) {
             }
             'x' -> {
                 advance()
-                return readHexEscape(2)
+                try {
+                    return readHexEscape(2)
+                } catch (e: Exception) {
+                    if (currentChar != null) {
+                        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                    }
+                    throw JSON5Exception.invalidEndOfInput(line, column)
+                }
             }
             'u' -> {
                 advance()
-                return readHexEscape(4)
+                try {
+                    return readHexEscape(4)
+                } catch (e: Exception) {
+                    if (currentChar != null) {
+                        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                    }
+                    throw JSON5Exception.invalidEndOfInput(line, column)
+                }
             }
+            null -> throw JSON5Exception.invalidEndOfInput(line, column)
+            in '1'..'9' -> throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
             else -> {
                 // Just return the character after the backslash (e.g. for \', \", etc.)
                 val c = currentChar
                 advance()
-                return c ?: throw JSON5Exception("Invalid escape sequence", line, column)
+                return c ?: throw JSON5Exception.invalidEndOfInput(line, column)
             }
         }
     }
@@ -403,7 +427,7 @@ class JSON5Lexer(private val source: String) {
             }
 
             if (!hasDigits) {
-                throw JSON5Exception("Invalid hexadecimal number", line, column)
+                throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
             }
 
             try {
@@ -416,7 +440,7 @@ class JSON5Lexer(private val source: String) {
                 }
                 return Token.NumericToken(value, startLine, startColumn)
             } catch (e: NumberFormatException) {
-                throw JSON5Exception("Invalid hexadecimal number: ${buffer}", line, column)
+                throw JSON5Exception("Invalid hexadecimal number", line, column)
             }
         }
 
@@ -464,7 +488,7 @@ class JSON5Lexer(private val source: String) {
             }
 
             if (!hasExponentDigits) {
-                throw JSON5Exception("Invalid exponent in number", line, column)
+                throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
             }
 
             hasExponentPart = true
@@ -472,7 +496,7 @@ class JSON5Lexer(private val source: String) {
 
         // Must have at least one part (integer, fraction, or starts with a decimal point)
         if (!(hasIntegerPart || hasFractionPart) || (hasFractionPart && !hasIntegerPart && buffer.length == 1)) {
-            throw JSON5Exception("Invalid number", line, column)
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
 
         val value = buffer.toString().toDouble()
@@ -516,8 +540,11 @@ class JSON5Lexer(private val source: String) {
     private fun readHexEscape(digits: Int): Char {
         val hexString = StringBuilder()
         repeat(digits) {
-            if (currentChar == null || !currentChar!!.isHexDigit()) {
-                throw JSON5Exception("Invalid hex escape sequence", line, column)
+            if (currentChar == null) {
+                throw JSON5Exception.invalidEndOfInput(line, column)
+            }
+            if (!currentChar!!.isHexDigit()) {
+                throw JSON5Exception.invalidChar(currentChar!!, line, column)
             }
             hexString.append(currentChar)
             advance()
