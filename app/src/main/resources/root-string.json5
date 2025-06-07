@@ -1,0 +1,3 @@
+// Root-level values can be strings, numbers, booleans, or null in JSON5
+"This is a valid root-level string in JSON5"
+

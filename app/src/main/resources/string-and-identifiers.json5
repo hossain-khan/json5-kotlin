@@ -1,0 +1,27 @@
+{
+  // String escape sequences
+  escapes: 'Escaped characters: \b \f \n \r \t \v \0 \x0F \u00A9',
+  quotes: "He said, \"Hello!\"",
+  singleQuotes: 'It\'s working',
+  multiline: 'This string \
+spans multiple \
+lines',
+  lineSeparators: 'Line\u2028and\u2029paragraph separators',
+
+  // Special identifiers as keys
+  $special_key: "Dollar sign prefix",
+  _under_score: "Underscore prefix",
+  ùñîçødë: "Unicode property name",
+
+  // Escaped property names
+  \u0061\u0062\u0063: "abc via Unicode escapes",
+
+  // Empty object and arrays
+  emptyObject: {},
+  emptyArray: [],
+
+  // Indentation and whitespace
+		indentedProperty:     42,
+
+  // Root value example shown in another file
+}

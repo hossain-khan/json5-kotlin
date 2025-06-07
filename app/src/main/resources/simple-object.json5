@@ -1,0 +1,13 @@
+{
+  // This is a simple object with various types of values
+  name: "John Doe", // Unquoted property name
+  age: 30,
+  isEmployed: true,
+  salary: 75000.50,
+  address: {
+    street: '123 Main St', // Single-quoted string
+    city: "New York",
+    zipCode: 10001
+  }
+}
+

@@ -1,0 +1,17 @@
+[
+  // This is an array with different data types
+  42,
+  "Hello World",
+  true,
+  null,
+  {
+    name: 'Nested object',
+    active: true,
+  },
+  [1, 2, 3], // Nested array
+  Infinity,  // Special numeric values
+  -Infinity,
+  NaN,
+  // Trailing comma is valid in JSON5
+]
+
