@@ -125,10 +125,12 @@ internal object JSON5Parser {
 
         while (true) {
             // Parse the property name
-            val key = when (token.type) {
-                TokenType.STRING -> (token as Token.StringToken).stringValue
-                TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
-                else -> throw JSON5Exception("Expected property name", token.line, token.column)
+            val key = when {
+                token.type == TokenType.STRING -> (token as Token.StringToken).stringValue
+                token.type == TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
+                token.type == TokenType.PUNCTUATOR && (token as Token.PunctuatorToken).punctuator == "}" ->
+                    break // This is for handling empty objects or trailing commas
+                else -> throw JSON5Exception("Expected property name or '}'", token.line, token.column)
             }
 
             // Expect a colon
