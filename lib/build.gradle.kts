@@ -6,6 +6,7 @@ plugins {
 }
 
 dependencies {
+    implementation(kotlin("stdlib")) // Explicitly add stdlib
     implementation(libs.bundles.kotlinxEcosystem)
 
     // Test dependencies
