@@ -1,20 +1,24 @@
 package org.json5.app
 
-import org.json5.utils.Printer
+import io.github.json5.kotlin.JSON5
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main() {
-    val name = "Kotlin"
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    val message = "Hello, " + name + "!"
-    val printer = Printer(message)
-    printer.printMessage()
+    val json5files = listOf(
+        "empty-json.json5",
+    )
 
-    for (i in 1..5) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        println("i = $i")
+    json5files.forEach { fileName ->
+        println("Processing file: $fileName")
+        // Load the file from resources using the classloader
+        val resourceStream = object {}.javaClass.getResourceAsStream("/$fileName")
+
+        if (resourceStream != null) {
+            val content = resourceStream.bufferedReader().use { it.readText() }
+            JSON5.parse(content).also { parsed ->
+                println("Parsed JSON5: $parsed")
+            }
+        } else {
+            println("Error: Could not find resource: $fileName")
+        }
     }
 }
