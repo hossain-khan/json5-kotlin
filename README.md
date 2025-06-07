@@ -1,6 +1,9 @@
 # json5-kotlin
 JSON5 implementation for Kotlin/JVM
 
+> [!WARNING]  
+> This is an experimental project. It's non-functional at the moment.
+
 This project uses [Gradle](https://gradle.org/).
 To build and run the application, use the *Gradle* tool window by clicking the Gradle icon in the right-hand toolbar,
 or run it directly from the terminal:
