@@ -25,12 +25,16 @@ internal object JSON5Parser {
      * @throws JSON5Exception if the input is invalid JSON5
      */
     fun parse(text: String, reviver: ((key: String, value: Any?) -> Any?)? = null): Any? {
+        if (text.isEmpty()) {
+            throw JSON5Exception.invalidEndOfInput(1, 1)
+        }
+
         val lexer = JSON5Lexer(text)
         var token = lexer.nextToken()
 
-        // Handle empty input
+        // Handle empty input or only comments
         if (token.type == TokenType.EOF) {
-            throw JSON5Exception("Empty JSON5 input", token.line, token.column)
+            throw JSON5Exception.invalidEndOfInput(token.line, token.column)
         }
 
         val result = parseValue(token, lexer)
@@ -38,7 +42,7 @@ internal object JSON5Parser {
         // Check that there's no extra content after the JSON5 value
         token = lexer.nextToken()
         if (token.type != TokenType.EOF) {
-            throw JSON5Exception("Unexpected additional content after JSON5 value", token.line, token.column)
+            throw JSON5Exception.invalidChar(text[token.column - 1], token.line, token.column)
         }
 
         // Apply the reviver function if provided
@@ -124,6 +128,10 @@ internal object JSON5Parser {
         }
 
         while (true) {
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             // Parse the property name
             val key = when {
                 token.type == TokenType.STRING -> (token as Token.StringToken).stringValue
@@ -135,12 +143,20 @@ internal object JSON5Parser {
 
             // Expect a colon
             token = lexer.nextToken()
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             if (token.type != TokenType.PUNCTUATOR || (token as Token.PunctuatorToken).punctuator != ":") {
                 throw JSON5Exception("Expected ':' after property name", token.line, token.column)
             }
 
             // Parse the property value
             token = lexer.nextToken()
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             val value = parseValue(token, lexer)
 
             // Add the property to the object
@@ -148,6 +164,10 @@ internal object JSON5Parser {
 
             // Expect a comma or closing brace
             token = lexer.nextToken()
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             if (token.type == TokenType.PUNCTUATOR) {
                 token as Token.PunctuatorToken
                 if (token.punctuator == "}") {
@@ -179,6 +199,10 @@ internal object JSON5Parser {
         }
 
         while (true) {
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             // Parse the element value
             val value = parseValue(token, lexer)
 
@@ -187,6 +211,10 @@ internal object JSON5Parser {
 
             // Expect a comma or closing bracket
             token = lexer.nextToken()
+            if (token.type == TokenType.EOF) {
+                throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+            }
+
             if (token.type == TokenType.PUNCTUATOR) {
                 token as Token.PunctuatorToken
                 if (token.punctuator == "]") {

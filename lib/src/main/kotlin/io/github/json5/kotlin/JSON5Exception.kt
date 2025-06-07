@@ -15,7 +15,7 @@ class JSON5Exception(
          */
         fun formatChar(c: Char): String {
             return when {
-                c.isISOControl() -> "\\x" + c.code.toString(16).padStart(2, '0')
+                c.code < 0x20 || c == '\u007F' -> "\\x" + c.code.toString(16).padStart(2, '0')
                 else -> c.toString()
             }
         }
