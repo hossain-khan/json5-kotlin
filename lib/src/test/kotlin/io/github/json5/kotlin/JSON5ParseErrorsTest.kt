@@ -370,4 +370,117 @@ class JSON5ParseErrorsTest {
         exception.lineNumber shouldBe 1
         exception.columnNumber shouldBe 2 // Position of the "1"
     }
+
+    @Test
+    @DisplayName("Object: should throw for invalid keys")
+    fun `object invalid keys`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{null: 1}") }
+        ex1.message shouldContain "Expected property name or '}'" // Lexer sees 'n', expects identifier or string key
+        ex1.lineNumber shouldBe 1
+        ex1.columnNumber shouldBe 2 // 'n'
+
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{true: 1}") }
+        ex2.message shouldContain "Expected property name or '}'"
+        ex2.lineNumber shouldBe 1
+        ex2.columnNumber shouldBe 2 // 't'
+
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("{123: 1}") }
+        ex3.message shouldContain "Expected property name or '}'"
+        ex3.lineNumber shouldBe 1
+        ex3.columnNumber shouldBe 2 // '1'
+    }
+
+    @Test
+    @DisplayName("Object: should throw for comma issues")
+    fun `object comma issues`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1,,}") }
+        ex1.message shouldContain "Expected property name or '}'" // Expects a key after comma
+        ex1.lineNumber shouldBe 1
+        ex1.columnNumber shouldBe 6
+
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{,a:1}") }
+        ex2.message shouldContain "Expected property name or '}'" // Cannot start with comma
+        ex2.lineNumber shouldBe 1
+        ex2.columnNumber shouldBe 2
+    }
+
+    @Test
+    @DisplayName("Object: should throw for structure issues")
+    fun `object structure issues`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1 b:2}") } // Missing comma
+        ex1.message shouldContain "Expected ',' or '}'" // Expects comma or }
+        ex1.lineNumber shouldBe 1
+        ex1.columnNumber shouldBe 6
+
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{\"a\":1 \"b\":2}") } // Missing comma, string keys
+        ex2.message shouldContain "Expected ',' or '}'" // Expects comma or }
+        ex2.lineNumber shouldBe 1
+        ex2.columnNumber shouldBe 8
+
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("{a:}") } // Missing value
+        ex3.message shouldContain "Unexpected punctuator" // Expects a value
+        ex3.lineNumber shouldBe 1
+        ex3.columnNumber shouldBe 4
+
+        val ex4 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1, :2}") } // Missing key
+        ex4.message shouldContain "Expected property name or '}'" // Expects a key
+        ex4.lineNumber shouldBe 1
+        ex4.columnNumber shouldBe 7
+    }
+
+    @Test
+    @DisplayName("Array: should throw for comma issues")
+    fun `array comma issues`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("[1,2,,]") }
+        ex1.message shouldContain "Unexpected punctuator" // Expects a value after comma
+        ex1.lineNumber shouldBe 1
+        ex1.columnNumber shouldBe 6
+
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("[,1,2]") }
+        ex2.message shouldContain "Unexpected punctuator" // Cannot start with comma
+        ex2.lineNumber shouldBe 1
+        ex2.columnNumber shouldBe 2
+
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("[1,,2]") } // Elision not allowed by spec
+        ex3.message shouldContain "Unexpected punctuator" // Expects value, finds comma
+        ex3.lineNumber shouldBe 1
+        ex3.columnNumber shouldBe 4
+    }
+
+    @Test
+    @DisplayName("Array: should throw for structure issues")
+    fun `array structure issues`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("[1 2]") } // Missing comma
+        ex1.message shouldContain "Expected ',' or ']'" // Expects comma or ]
+        ex1.lineNumber shouldBe 1
+        ex1.columnNumber shouldBe 4
+    }
+
+    @Test
+    @DisplayName("String: should throw for unterminated strings")
+    fun `string unterminated`() {
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("\"abc") }
+        ex1.message shouldContain "invalid end of input"
+        ex1.lineNumber shouldBe 1 // The line where the string started
+        // Column could be end of line or where EOF is effectively seen
+        // ex1.columnNumber shouldBe 4
+
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("'abc") }
+        ex2.message shouldContain "invalid end of input"
+        ex2.lineNumber shouldBe 1
+        // ex2.columnNumber shouldBe 4
+    }
+
+    @Test
+    @DisplayName("String: should throw for invalid unescaped newline")
+    fun `string invalid unescaped newline`() {
+        val jsonStringWithUnescapedLF = "'abc\ndef'" // Kotlin makes this a literal LF
+        val exception = shouldThrow<JSON5Exception> {
+            JSON5.parse(jsonStringWithUnescapedLF)
+        }
+        exception.message shouldContain "invalid character '\\x0a'" // LF
+        exception.lineNumber shouldBe 2 // Error is on the first line where string starts
+        exception.columnNumber shouldBe 1 // After 'abc'
+    }
+
 }

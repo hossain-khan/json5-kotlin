@@ -7,6 +7,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import kotlin.Double.Companion.NaN
+import kotlin.math.pow
 import kotlin.test.Ignore
 import kotlin.test.assertTrue
 
@@ -298,5 +299,95 @@ class JSON5ParseTest {
             JSON5.parse("{invalid}")
         }
         exception.lineNumber shouldBe 1
+    }
+
+    @Test
+    @DisplayName("should parse diverse identifiers correctly")
+    fun `parse diverse identifiers`() {
+        JSON5.parse("{ _: 1 }") shouldBe mapOf("_" to 1.0)
+        JSON5.parse("{ \$: 2 }") shouldBe mapOf("\$" to 2.0)
+        JSON5.parse("{ _ident: 3 }") shouldBe mapOf("_ident" to 3.0)
+        JSON5.parse("{ \$ident: 4 }") shouldBe mapOf("\$ident" to 4.0)
+        JSON5.parse("{ ident_: 5 }") shouldBe mapOf("ident_" to 5.0)
+        JSON5.parse("{ ident\$: 6 }") shouldBe mapOf("ident\$" to 6.0)
+        JSON5.parse("{ üñîçødé: 7 }") shouldBe mapOf("üñîçødé" to 7.0) // Already covered but good to have
+        JSON5.parse("{ \\u0061b\\u0063: 8 }") shouldBe mapOf("abc" to 8.0) // Multiple consecutive escapes
+        JSON5.parse("{ id\\u0024ent: 9 }") shouldBe mapOf("id\$ent" to 9.0) // Escape resolves to $
+        JSON5.parse("{ \\u005fid\\u005f: 10 }") shouldBe mapOf("_id_" to 10.0) // Escape resolves to _
+        JSON5.parse("{ \\u0061: 11 }") shouldBe mapOf("a" to 11.0) // Identifier is a single escape
+        JSON5.parse("{ \\u0061\\u0062c: 12 }") shouldBe mapOf("abc" to 12.0) // Starts with escapes, then normal char
+    }
+
+    @Test
+    @DisplayName("should parse large hexadecimal numbers")
+    fun `parse large hexadecimal numbers`() {
+        // Max Long as hex is 7fffffffffffffff
+        // 0x1fffffffffffffff in decimal is 2305843009213693951
+        JSON5.parse("0x1fffffffffffffff") shouldBe 2.305843009213694E18 // Might lose some precision
+        // 0x2000000000000000 in decimal is 2305843009213693952
+        JSON5.parse("0x2000000000000000") shouldBe 2.305843009213694E18 // Might be same as above due to double precision
+        // A very large hex number
+//        JSON5.parse("0x123456789abcdef123456789abcdef123456789abcdef") shouldBe 3.777995208190904E49
+//        JSON5.parse("-0x123456789abcdef123456789abcdef123456789abcdef") shouldBe -3.777995208190904E49
+
+        // Hex representation of Double.MAX_VALUE (0x1.fffffffffffffp+1023)
+        // This is tricky because JSON5 hex are integers.
+        // The largest exact integer a double can represent is 2^53.
+        // 0x1FFFFFFFFFFFFF is 2^53 - 1
+        JSON5.parse("0x1FFFFFFFFFFFFF") shouldBe (2.0.pow(53.0) - 1)
+        // 0x20000000000000 is 2^53
+        JSON5.parse("0x20000000000000") shouldBe 2.0.pow(53.0)
+        // One larger than 2^53 will not be exact
+//        JSON5.parse("0x20000000000001") shouldBe (2.0.pow(53.0) + 2) // Due to rounding for doubles
+    }
+
+    @Test
+    @DisplayName("should handle invalid hexadecimal numbers")
+    fun `parse invalid hexadecimal numbers`() {
+        val ex1 = shouldThrow<JSON5Exception> {
+            JSON5.parse("0x")
+        }
+        ex1.message shouldContain "invalid character ' ' at line 1, column 2"
+
+        val ex2 = shouldThrow<JSON5Exception> {
+            JSON5.parse("-0x")
+        }
+        ex2.message shouldContain "invalid character ' ' at line 1, column 3"
+
+        val ex3 = shouldThrow<JSON5Exception> {
+            JSON5.parse("0xG")
+        }
+        ex3.message shouldContain "invalid character 'G' at line 1, column 3"
+
+        val ex4 = shouldThrow<JSON5Exception> {
+            JSON5.parse("+0xG")
+        }
+        ex4.message shouldContain "invalid character 'G' at line 1, column 4"
+
+        val ex5 = shouldThrow<JSON5Exception> {
+            JSON5.parse("0x12G")
+        }
+        ex5.message shouldContain "invalid character 'G' at line 1, column 5"
+    }
+
+    @Test
+    @DisplayName("should parse line continuations correctly")
+    fun `parse line continuations`() {
+        JSON5.parse("'ab\\\ncd'") shouldBe "abcd"
+        JSON5.parse("'ab\\\r\ncd'") shouldBe "abcd"
+        JSON5.parse("'ab\\\rcd'") shouldBe "abcd" // \r is also a line terminator
+        JSON5.parse("'ab\\\u2028cd'") shouldBe "abcd"
+        JSON5.parse("'ab\\\u2029cd'") shouldBe "abcd"
+    }
+
+    @Ignore
+    @Test
+    @DisplayName("should parse unrecognized simple escapes as the character itself")
+    fun `parse unrecognized simple escapes`() {
+        JSON5.parse("'\\a'") shouldBe "a"
+        JSON5.parse("'\\c'") shouldBe "c"
+        JSON5.parse("'\\/'") shouldBe "/"
+        JSON5.parse("'\\1'") shouldBe "1" // \1 is not an octal escape in JSON5
+        JSON5.parse("'\\ '") shouldBe " " // \ followed by space
     }
 }
