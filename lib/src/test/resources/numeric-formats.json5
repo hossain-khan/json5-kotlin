@@ -1,0 +1,31 @@
+{
+  /* Multi-line comment example
+     showing various numeric formats
+     supported by JSON5 */
+
+  // Regular numbers
+  integer: 42,
+  negative: -17,
+  float: 3.14159,
+
+  // Numbers with different formats
+  leadingDecimal: .25,       // Leading decimal point
+  trailingDecimal: 5.,       // Trailing decimal point
+  positiveSign: +42,         // Explicit positive sign
+
+  // Hexadecimal numbers
+  hex: 0xC0FFEE,            // Uppercase hex
+  smallHex: 0xff,           // Lowercase hex
+  negativeHex: -0x7B,       // Negative hex
+
+  // Scientific notation
+  scientific: 6.02e23,      // Regular scientific notation
+  negativeExp: 1e-10,       // Negative exponent
+  positiveExp: 1.5e+4,      // Explicit positive exponent
+
+  // Special numeric values
+  infinite: Infinity,
+  negativeInfinite: -Infinity,
+  notANumber: NaN,
+}
+
