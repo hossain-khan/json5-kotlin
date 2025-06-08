@@ -5,7 +5,20 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
+/**
+ * Tests the JSON5 parser's ability to handle a large and complex JSON5 file.
+ * This class focuses on ensuring the parser can correctly process substantial inputs
+ * that may include a wide variety of JSON5 features, nested structures, and numerous entries.
+ */
 class JSON5ParserTestLargeFile {
+    /**
+     * Parses the `runtime_enabled_features.json5` file, a real-world example from Chromium.
+     * This test performs several assertions to verify the structural integrity and
+     * content of the parsed data. It checks for the presence of specific keys,
+     * the types of values (Map, List), and the values of certain properties within
+     * the parsed configuration. This ensures the parser handles large, complex,
+     * and potentially deeply nested JSON5 documents correctly.
+     */
     @Test
     fun testParseSimpleChromiumConfig() {
         val path = Paths.get("src/test/resources/runtime_enabled_features.json5")
