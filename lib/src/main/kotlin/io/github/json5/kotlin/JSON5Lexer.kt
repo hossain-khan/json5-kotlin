@@ -32,6 +32,13 @@ class JSON5Lexer(private val source: String) {
     fun nextToken(): Token {
         skipWhitespace()
         skipComments()
+        // Fix: skip whitespace and comments in a loop before every token
+        while (true) {
+            val before = pos
+            skipWhitespace()
+            skipComments()
+            if (pos == before) break
+        }
 
         if (currentChar == null) {
             return Token.EOFToken(line, column)
@@ -44,136 +51,156 @@ class JSON5Lexer(private val source: String) {
                 token
             }
             '"', '\'' -> readString()
-            'n' -> readNull()
-            't' -> readTrue()
-            'f' -> readFalse()
-            'I' -> readInfinity()
-            'N' -> readNaN()
-            '+', '-' -> {
-                if (peek() == 'I') {
-                    // Handle -Infinity
-                    val sign = currentChar
-                    val startColumn = column
-                    advance()
-                    if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-                        repeat(8) { advance() }
-                        return Token.NumericToken(if (sign == '-') Double.NEGATIVE_INFINITY else Double.POSITIVE_INFINITY, line, startColumn)
-                    }
-                    // Not Infinity, revert and continue with normal number parsing
-                    pos -= 1
-                    if (currentChar == '\n') {
-                        line -= 1
-                        column = 1
-                    } else {
-                        column -= 1
-                    }
-                    currentChar = sign
-                } else if (peek() == 'N') {
-                    // Handle -NaN
-                    val sign = currentChar
-                    val startColumn = column
-                    advance()
-                    if (source.substring(pos, minOf(pos + 3, source.length)) == "NaN") {
-                        repeat(3) { advance() }
-                        return Token.NumericToken(Double.NaN, line, startColumn) // NaN is NaN regardless of sign
-                    }
-                    // Not NaN, revert and continue with normal number parsing
-                    pos -= 1
-                    if (currentChar == '\n') {
-                        line -= 1
-                        column = 1
-                    } else {
-                        column -= 1
-                    }
-                    currentChar = sign
-                }
-                readNumber()
-            }
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.' -> readNumber()
-            '\\' -> {
-                // Handle Unicode escape sequences in identifiers
-                val startColumn = column
-                advance() // Skip the backslash
-
-                // Now process the escaped character
-                if (currentChar == 'u') {
-                    advance() // Skip 'u'
-                    val hexDigits = StringBuilder()
-                    repeat(4) {
-                        if (currentChar == null || !currentChar!!.isHexDigit()) {
-                            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-                        }
-                        hexDigits.append(currentChar)
-                        advance()
-                    }
-
-                    val char = hexDigits.toString().toInt(16).toChar()
-                    if (!isIdentifierStart(char)) {
-                        throw JSON5Exception.invalidIdentifierChar(line, startColumn)
-                    }
-
-                    val buffer = StringBuilder().append(char)
-
-                    // Continue reading the rest of the identifier
-                    while (currentChar != null) {
-                        if (currentChar == '\\') {
-                            val continueColumn = column
-                            advance() // Skip backslash
-
-                            if (currentChar == 'u') {
-                                advance() // Skip 'u'
-                                val identHexDigits = StringBuilder()
-                                repeat(4) {
-                                    if (currentChar == null || !currentChar!!.isHexDigit()) {
-                                        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-                                    }
-                                    identHexDigits.append(currentChar)
-                                    advance()
-                                }
-
-                                val continueChar = identHexDigits.toString().toInt(16).toChar()
-                                if (!isIdentifierPart(continueChar)) {
-                                    throw JSON5Exception.invalidIdentifierChar(line, continueColumn)
-                                }
-
-                                buffer.append(continueChar)
-                            } else {
-                                throw JSON5Exception.invalidChar(currentChar ?: ' ', line, continueColumn)
-                            }
-                        } else if (isIdentifierPart(currentChar)) {
-                            buffer.append(currentChar)
-                            advance()
-                        } else {
-                            break
-                        }
-                    }
-
-                    return Token.IdentifierToken(buffer.toString(), line, startColumn)
-                } else {
-                    throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-                }
-            }
-            '$', '_' -> {
-                // Handle property names starting with $ or _
-                readIdentifier()
-            }
-            '/' -> {
-                // Handle incomplete comments
-                val startColumn = column
-                val lookAhead = peek()
-                if (lookAhead == null) {
-                    advance()
-                    throw JSON5Exception.invalidChar('/', line, startColumn)
-                }
-                if (lookAhead != '/' && lookAhead != '*') {
-                    advance()
-                    throw JSON5Exception.invalidChar('/', line, startColumn)
-                }
-                throw JSON5Exception.invalidChar(lookAhead, line, column + 1)
-            }
+            // Fix: Only treat 'n', 't', 'f', 'I', 'N' as keywords if they match the full identifier
             else -> {
                 if (isIdentifierStart(currentChar)) {
-                    readIdentifier()
+                    return readIdentifier()
+                } else if (currentChar == 'n') {
+                    return readNull()
+                } else if (currentChar == 't') {
+                    return readTrue()
+                } else if (currentChar == 'f') {
+                    return readFalse()
+                } else if (currentChar == 'I') {
+                    return readInfinity()
+                } else if (currentChar == 'N') {
+                    return readNaN()
+                } else if (currentChar == '+') {
+                    if (peek() == 'I') {
+                        // Handle +Infinity
+                        val sign = currentChar
+                        val startColumn = column
+                        advance()
+                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
+                            repeat(8) { advance() }
+                            return Token.NumericToken(Double.POSITIVE_INFINITY, line, startColumn)
+                        }
+                        pos -= 1
+                        if (currentChar == '\n') {
+                            line -= 1
+                            column = 1
+                        } else {
+                            column -= 1
+                        }
+                        currentChar = sign
+                    }
+                    return readNumber()
+                } else if (currentChar == '-') {
+                    if (peek() == 'I') {
+                        // Handle -Infinity
+                        val sign = currentChar
+                        val startColumn = column
+                        advance()
+                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
+                            repeat(8) { advance() }
+                            return Token.NumericToken(Double.NEGATIVE_INFINITY, line, startColumn)
+                        }
+                        pos -= 1
+                        if (currentChar == '\n') {
+                            line -= 1
+                            column = 1
+                        } else {
+                            column -= 1
+                        }
+                        currentChar = sign
+                    } else if (peek() == 'N') {
+                        // Handle -NaN
+                        val sign = currentChar
+                        val startColumn = column
+                        advance()
+                        if (source.substring(pos, minOf(pos + 3, source.length)) == "NaN") {
+                            repeat(3) { advance() }
+                            return Token.NumericToken(Double.NaN, line, startColumn) // NaN is NaN regardless of sign
+                        }
+                        pos -= 1
+                        if (currentChar == '\n') {
+                            line -= 1
+                            column = 1
+                        } else {
+                            column -= 1
+                        }
+                        currentChar = sign
+                    }
+                    return readNumber()
+                } else if (currentChar in '0'..'9' || currentChar == '.') {
+                    return readNumber()
+                } else if (currentChar == '\\') {
+                    // Handle Unicode escape sequences in identifiers
+                    val startColumn = column
+                    advance() // Skip the backslash
+
+                    // Now process the escaped character
+                    if (currentChar == 'u') {
+                        advance() // Skip 'u'
+                        val hexDigits = StringBuilder()
+                        repeat(4) {
+                            if (currentChar == null || !currentChar!!.isHexDigit()) {
+                                throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                            }
+                            hexDigits.append(currentChar)
+                            advance()
+                        }
+
+                        val char = hexDigits.toString().toInt(16).toChar()
+                        if (!isIdentifierStart(char)) {
+                            throw JSON5Exception.invalidIdentifierChar(line, startColumn)
+                        }
+
+                        val buffer = StringBuilder().append(char)
+
+                        // Continue reading the rest of the identifier
+                        while (currentChar != null) {
+                            if (currentChar == '\\') {
+                                val continueColumn = column
+                                advance() // Skip backslash
+
+                                if (currentChar == 'u') {
+                                    advance() // Skip 'u'
+                                    val identHexDigits = StringBuilder()
+                                    repeat(4) {
+                                        if (currentChar == null || !currentChar!!.isHexDigit()) {
+                                            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                                        }
+                                        identHexDigits.append(currentChar)
+                                        advance()
+                                    }
+
+                                    val continueChar = identHexDigits.toString().toInt(16).toChar()
+                                    if (!isIdentifierPart(continueChar)) {
+                                        throw JSON5Exception.invalidIdentifierChar(line, continueColumn)
+                                    }
+
+                                    buffer.append(continueChar)
+                                } else {
+                                    throw JSON5Exception.invalidChar(currentChar ?: ' ', line, continueColumn)
+                                }
+                            } else if (isIdentifierPart(currentChar)) {
+                                buffer.append(currentChar)
+                                advance()
+                            } else {
+                                break
+                            }
+                        }
+
+                        return Token.IdentifierToken(buffer.toString(), line, startColumn)
+                    } else {
+                        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                    }
+                } else if (currentChar == '$' || currentChar == '_') {
+                    return readIdentifier()
+                } else if (currentChar == '/') {
+                    // Handle incomplete comments
+                    val startColumn = column
+                    val lookAhead = peek()
+                    if (lookAhead == null) {
+                        advance()
+                        throw JSON5Exception.invalidChar('/', line, startColumn)
+                    }
+                    if (lookAhead != '/' && lookAhead != '*') {
+                        advance()
+                        throw JSON5Exception.invalidChar('/', line, startColumn)
+                    }
+                    throw JSON5Exception.invalidChar(lookAhead, line, column + 1)
                 } else {
                     val c = currentChar ?: ' '
                     val startColumn = column
@@ -677,7 +704,13 @@ class JSON5Lexer(private val source: String) {
             }
         }
 
-        return Token.IdentifierToken(buffer.toString(), line, startColumn)
+        val ident = buffer.toString()
+        return when (ident) {
+            "true" -> Token.BooleanToken(true, line, startColumn)
+            "false" -> Token.BooleanToken(false, line, startColumn)
+            "null" -> Token.NullToken(line, startColumn)
+            else -> Token.IdentifierToken(ident, line, startColumn)
+        }
     }
 
     private fun readHexEscape(digits: Int): Char {
