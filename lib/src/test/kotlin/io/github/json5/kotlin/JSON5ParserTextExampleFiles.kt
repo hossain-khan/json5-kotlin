@@ -140,4 +140,26 @@ class JSON5ParserTextExampleFiles {
         val expected = "This is a valid root-level string in JSON5"
         assertEquals(expected, result)
     }
+
+    @Test
+    fun testParseKitchenSinkJson5() {
+        val path = Paths.get("src/test/resources/kitchen-sink.json5")
+        val json5Text = Files.readString(path)
+        val result = JSON5Parser.parse(json5Text)
+
+        val expected = mapOf(
+            "unquoted" to "and you can quote me on that",
+            "singleQuotes" to "I can use \"double quotes\" here",
+            "lineBreaks" to "Look, Mom! No \\n's!",
+            "hexadecimal" to 0xDECAF.toDouble(),
+            "leadingDecimalPoint" to 0.8675309,
+            "andTrailing" to 8675309.0,
+            "positiveSign" to 1.0,
+            "trailingComma" to "in objects",
+            "andIn" to listOf("arrays"),
+            "backwardsCompatible" to "with JSON"
+        )
+
+        assertEquals(expected, result)
+    }
 }
