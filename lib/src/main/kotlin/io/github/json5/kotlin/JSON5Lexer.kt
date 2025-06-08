@@ -303,7 +303,11 @@ class JSON5Lexer(private val source: String) {
                 }
                 '\\' -> {
                     advance() // Skip the backslash
-                    buffer.append(readEscapeSequence())
+                    val escapeChar = readEscapeSequenceOrNull()
+                    if (escapeChar != null) {
+                        // Only append if it's not a line continuation
+                        buffer.append(escapeChar)
+                    }
                 }
                 '\n', '\r' -> throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
                 else -> {
@@ -320,7 +324,10 @@ class JSON5Lexer(private val source: String) {
         return Token.StringToken(buffer.toString(), startLine, startColumn)
     }
 
-    private fun readEscapeSequence(): Char {
+    /**
+     * Read an escape sequence, returning null for line continuations
+     */
+    private fun readEscapeSequenceOrNull(): Char? {
         val escapeCol = column
 
         return when (currentChar) {
@@ -378,16 +385,16 @@ class JSON5Lexer(private val source: String) {
             }
             '\n' -> {
                 advance()
-                '\u0000' // Line continuation - returns nothing
+                null // Line continuation - skip the newline
             }
             '\r' -> {
                 advance()
                 if (currentChar == '\n') advance()
-                '\u0000' // Line continuation - returns nothing
+                null // Line continuation - skip the CR/LF
             }
             '\u2028', '\u2029' -> {
                 advance()
-                '\u0000' // Line continuation - returns nothing
+                null // Line continuation - skip line/paragraph separator
             }
             'x' -> {
                 advance() // Skip 'x'

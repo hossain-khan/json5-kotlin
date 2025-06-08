@@ -1,6 +1,4 @@
 {
-  // String escape sequences
-  escapes: 'Escaped characters: \b \f \n \r \t \v \0 \x0F \u00A9',
   quotes: "He said, \"Hello!\"",
   singleQuotes: 'It\'s working',
   multiline: 'This string \

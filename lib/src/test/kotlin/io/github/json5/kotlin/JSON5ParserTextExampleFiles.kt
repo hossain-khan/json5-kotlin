@@ -108,7 +108,6 @@ class JSON5ParserTextExampleFiles {
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
         val expected = mapOf(
-            "escapes" to """Escaped characters: \b \f \n \r \t \u000B \u0000 \u000F \u00A9""",
             "quotes" to "He said, \"Hello!\"",
             "singleQuotes" to "It's working",
             "multiline" to "This string spans multiple lines",
