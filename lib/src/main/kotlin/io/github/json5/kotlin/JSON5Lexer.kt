@@ -709,6 +709,9 @@ class JSON5Lexer(private val source: String) {
             "true" -> Token.BooleanToken(true, line, startColumn)
             "false" -> Token.BooleanToken(false, line, startColumn)
             "null" -> Token.NullToken(line, startColumn)
+            "Infinity" -> Token.NumericToken(Double.POSITIVE_INFINITY, line, startColumn)
+            "-Infinity" -> Token.NumericToken(Double.NEGATIVE_INFINITY, line, startColumn)
+            "NaN" -> Token.NumericToken(Double.NaN, line, startColumn)
             else -> Token.IdentifierToken(ident, line, startColumn)
         }
     }
