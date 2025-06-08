@@ -435,70 +435,160 @@ class JSON5Lexer(private val source: String) {
         val startColumn = column
         val startLine = line
 
-        // Verify that the characters spell "null"
-        if (source.substring(pos, minOf(pos + 4, source.length)) == "null") {
-            repeat(4) { advance() }
-            return Token.NullToken(startLine, startColumn)
+        // Check each character of "null" individually
+        if (currentChar != 'n') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
+        advance()
 
-        throw JSON5Exception("Unexpected identifier", startLine, startColumn)
+        if (currentChar != 'u') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'l') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'l') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        return Token.NullToken(startLine, startColumn)
     }
 
     private fun readTrue(): Token {
         val startColumn = column
         val startLine = line
 
-        // Verify that the characters spell "true"
-        if (source.substring(pos, minOf(pos + 4, source.length)) == "true") {
-            repeat(4) { advance() }
-            return Token.BooleanToken(true, startLine, startColumn)
-        } else {
-            val c = source.getOrNull(pos + 3)
-            if (c != null && pos + 3 < source.length) {
-                throw JSON5Exception.invalidChar(c, line, column + 3)
-            }
+        // Check each character of "true" individually
+        if (currentChar != 't') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
+        advance()
 
-        throw JSON5Exception("Unexpected identifier", startLine, startColumn)
+        if (currentChar != 'r') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'u') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'e') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        return Token.BooleanToken(true, startLine, startColumn)
     }
 
     private fun readFalse(): Token {
         val startColumn = column
         val startLine = line
 
-        // Verify that the characters spell "false"
-        if (source.substring(pos, minOf(pos + 5, source.length)) == "false") {
-            repeat(5) { advance() }
-            return Token.BooleanToken(false, startLine, startColumn)
+        // Check each character of "false" individually
+        if (currentChar != 'f') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
+        advance()
 
-        throw JSON5Exception("Unexpected identifier", startLine, startColumn)
+        if (currentChar != 'a') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'l') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 's') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'e') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        return Token.BooleanToken(false, startLine, startColumn)
     }
 
     private fun readInfinity(): Token {
         val startColumn = column
         val startLine = line
 
-        // Verify that the characters spell "Infinity"
-        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-            repeat(8) { advance() }
-            return Token.NumericToken(Double.POSITIVE_INFINITY, startLine, startColumn)
+        // Check each character of "Infinity" individually
+        if (currentChar != 'I') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
+        advance()
 
-        throw JSON5Exception("Unexpected identifier", startLine, startColumn)
+        if (currentChar != 'n') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'f') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'i') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'n') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'i') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 't') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'y') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        return Token.NumericToken(Double.POSITIVE_INFINITY, startLine, startColumn)
     }
 
     private fun readNaN(): Token {
         val startColumn = column
         val startLine = line
 
-        // Verify that the characters spell "NaN"
-        if (source.substring(pos, minOf(pos + 3, source.length)) == "NaN") {
-            repeat(3) { advance() }
-            return Token.NumericToken(Double.NaN, startLine, startColumn)
+        // Check each character of "NaN" individually
+        if (currentChar != 'N') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
         }
+        advance()
 
-        throw JSON5Exception("Unexpected identifier", startLine, startColumn)
+        if (currentChar != 'a') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        if (currentChar != 'N') {
+            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        }
+        advance()
+
+        return Token.NumericToken(Double.NaN, startLine, startColumn)
     }
 
     private fun readNumber(): Token.NumericToken {
