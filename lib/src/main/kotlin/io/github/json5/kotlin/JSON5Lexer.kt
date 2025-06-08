@@ -762,7 +762,6 @@ class JSON5Lexer(private val source: String) {
         val buffer = StringBuilder()
 
         // Handle the case where the first character is already processed
-        // (e.g., when called from the main switch statement)
         if (currentChar != null && isIdentifierStart(currentChar)) {
             buffer.append(currentChar)
             advance()
@@ -797,7 +796,19 @@ class JSON5Lexer(private val source: String) {
                 buffer.append(currentChar)
                 advance()
             } else {
-                break
+                // Special handling for malformed literals - check if this might be a truncated literal
+                val ident = buffer.toString()
+                if ((ident == "t" || ident == "tr" || ident == "tru") && currentChar != null) {
+                    // This looks like a malformed "true" literal
+                    throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                } else if ((ident == "f" || ident == "fa" || ident == "fal" || ident == "fals") && currentChar != null) {
+                    // This looks like a malformed "false" literal
+                    throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                } else if ((ident == "n" || ident == "nu" || ident == "nul") && currentChar != null) {
+                    // This looks like a malformed "null" literal
+                    throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                }
+                break;
             }
         }
 
