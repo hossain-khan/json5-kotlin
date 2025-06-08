@@ -5,7 +5,17 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
+/**
+ * Tests the JSON5 parser using various example `.json5` files from the test resources.
+ * These tests validate the parser's ability to correctly interpret different JSON5 features
+ * by comparing the parsed output against expected Kotlin data structures (Maps and Lists).
+ */
 class JSON5ParserTextExampleFiles {
+    /**
+     * Tests parsing of a basic JSON5 object from the `simple-object.json5` resource file.
+     * This file includes common data types like strings, numbers, booleans, and a nested object,
+     * primarily using quoted keys and standard JSON-like syntax.
+     */
     @Test
     fun testParseSimpleObjectJson5() {
         val path = Paths.get("src/test/resources/simple-object.json5")
@@ -27,6 +37,11 @@ class JSON5ParserTextExampleFiles {
         assertEquals(expected, result)
     }
 
+    /**
+     * Tests parsing of a JSON5 array containing various data types from `array-example.json5`.
+     * This includes numbers, strings, booleans, null, a nested object, a nested array,
+     * and special numeric values like Infinity and NaN.
+     */
     @Test
     fun testParseArrayExampleJson5() {
         val path = Paths.get("src/test/resources/array-example.json5")
@@ -60,6 +75,10 @@ class JSON5ParserTextExampleFiles {
         }
     }
 
+    /**
+     * Tests parsing of an empty JSON5 object from `empty-json.json5`.
+     * Verifies that an empty but valid JSON5 object string is parsed into an empty Kotlin Map.
+     */
     @Test
     fun testParseEmptyJson5() {
         val path = Paths.get("src/test/resources/empty-json.json5")
@@ -69,6 +88,12 @@ class JSON5ParserTextExampleFiles {
         assertEquals(expected, result)
     }
 
+    /**
+     * Tests parsing of various numeric formats from `numeric-formats.json5`.
+     * This includes integers, negative numbers, floats, leading/trailing decimal points,
+     * explicit positive signs, hexadecimal numbers, scientific notation,
+     * and special values like Infinity and NaN.
+     */
     @Test
     fun testParseNumericFormatsJson5() {
         val path = Paths.get("src/test/resources/numeric-formats.json5")
@@ -102,6 +127,12 @@ class JSON5ParserTextExampleFiles {
         }
     }
 
+    /**
+     * Tests parsing of various string formats and identifier types from `string-and-identifiers.json5`.
+     * This covers single and double quoted strings, multi-line strings, strings with line/paragraph separators,
+     * unquoted identifiers with special characters ($, _), Unicode identifiers, and identifiers with Unicode escapes.
+     * It also includes empty objects and arrays as values.
+     */
     @Test
     fun testParseStringAndIdentifiersJson5() {
         val path = Paths.get("src/test/resources/string-and-identifiers.json5")
@@ -132,6 +163,10 @@ class JSON5ParserTextExampleFiles {
         }
     }
 
+    /**
+     * Tests parsing of a JSON5 document where the root value is a single string, from `root-string.json5`.
+     * JSON5 allows any valid JSON5 value as the root of a document, not just objects or arrays.
+     */
     @Test
     fun testParseRootStringJson5() {
         val path = Paths.get("src/test/resources/root-string.json5")
@@ -141,6 +176,12 @@ class JSON5ParserTextExampleFiles {
         assertEquals(expected, result)
     }
 
+    /**
+     * Tests parsing of a comprehensive JSON5 example from `kitchen-sink.json5`.
+     * This file includes a variety of JSON5 features: unquoted keys, single-quoted strings,
+     * strings with line breaks, hexadecimal numbers, numbers with leading/trailing decimal points,
+     * explicit positive signs, and trailing commas in objects and arrays.
+     */
     @Test
     fun testParseKitchenSinkJson5() {
         val path = Paths.get("src/test/resources/kitchen-sink.json5")

@@ -6,9 +6,17 @@ import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
+/**
+ * Tests for error handling in JSON5 parsing.
+ * This class verifies that the parser correctly throws [JSON5Exception] for various
+ * syntax errors and invalid JSON5 constructs.
+ */
 @DisplayName("JSON5.parse errors")
 class JSON5ParseErrorsTest {
 
+    /**
+     * Tests that parsing an empty document throws an error.
+     */
     @Test
     fun `should throw on empty documents`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -19,6 +27,10 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1
     }
 
+    /**
+     * Tests that parsing a document containing only comments throws an error,
+     * as a valid JSON5 document must have a top-level value.
+     */
     @Test
     fun `should throw on documents with only comments`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -29,6 +41,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3 // After reading "//a", the cursor is at the end of input
     }
 
+    /**
+     * Tests that an incomplete single-line comment (e.g., `/` not followed by `/`) throws an error.
+     */
     @Test
     fun `should throw on incomplete single line comments`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -39,6 +54,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1
     }
 
+    /**
+     * Tests that an unterminated multi-line comment (e.g., `/*` without `*/`) throws an error.
+     */
     @Test
     fun `should throw on unterminated multiline comments`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -49,6 +67,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2 // Position of the '*'
     }
 
+    /**
+     * Tests that an unterminated multi-line comment closing (e.g., `/**` without matching `*/`) throws an error.
+     */
     @Test
     fun `should throw on unterminated multiline comment closings`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -59,6 +80,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3 // Position of the second '*'
     }
 
+    /**
+     * Tests that invalid characters appearing where a value is expected throw an error.
+     */
     @Test
     fun `should throw on invalid characters in values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -69,6 +93,10 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1
     }
 
+    /**
+     * Tests that invalid characters within an identifier's escape sequence (e.g. `{\a:1}`) throw an error.
+     * This typically occurs if an escape sequence is not a valid Unicode escape (`\uXXXX`) or a valid single character escape.
+     */
     @Test
     fun `should throw on invalid characters in identifier start escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -79,6 +107,10 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an identifier starting with an invalid character (e.g. `{\u0021:1}` which is `{!":"1}`) throws an error.
+     * `!` is not a valid start for an identifier.
+     */
     @Test
     fun `should throw on invalid identifier start characters`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -89,6 +121,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests that an invalid escape sequence within an identifier (not at the start) throws an error.
+     */
     @Test
     fun `should throw on invalid characters in identifier continue escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -99,6 +134,10 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3 // Parser reported error at col 3
     }
 
+    /**
+     * Tests that an identifier containing an invalid character (e.g. `{a\u0021:1}` which is `{"a!":1}`) throws an error.
+     * `!` is not a valid continuation character for an identifier.
+     */
     @Test
     fun `should throw on invalid identifier continue characters`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -109,6 +148,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an invalid character immediately following a sign (`+` or `-`) in a number throws an error.
+     */
     @Test
     fun `should throw on invalid characters following a sign`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -119,6 +161,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests that an invalid character immediately following a leading decimal point in a number throws an error.
+     */
     @Test
     fun `should throw on invalid characters following a leading decimal point`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -129,6 +174,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests that an invalid character immediately following an exponent indicator (`e` or `E`) in a number throws an error.
+     */
     @Test
     fun `should throw on invalid characters following an exponent indicator`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -139,6 +187,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an invalid character immediately following an exponent sign (`+` or `-`) in a number throws an error.
+     */
     @Test
     fun `should throw on invalid characters following an exponent sign`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -149,6 +200,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that an invalid character immediately following a hexadecimal indicator (`0x` or `0X`) in a number throws an error.
+     */
     @Test
     fun `should throw on invalid characters following a hexadecimal indicator`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -159,6 +213,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an unescaped newline character within a string throws an error.
+     */
     @Test
     fun `should throw on invalid new lines in strings`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -169,6 +226,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1 // In JavaScript, the column resets to 0, but Kotlin uses 1-indexed
     }
 
+    /**
+     * Tests that an unterminated string (missing closing quote) throws an error.
+     */
     @Test
     fun `should throw on unterminated strings`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -179,6 +239,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests that an object property name starting with an invalid identifier character (e.g. `!`) throws an error.
+     */
     @Test
     fun `should throw on invalid identifier start characters in property names`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -189,6 +252,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests that an invalid character appearing immediately after a property name (before the colon) throws an error.
+     */
     @Test
     fun `should throw on invalid characters following a property name`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -199,6 +265,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an invalid character appearing immediately after a property value (before a comma or closing brace) throws an error.
+     */
     @Test
     fun `should throw on invalid characters following a property value`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -209,6 +278,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 5
     }
 
+    /**
+     * Tests that an invalid character appearing immediately after an array value (before a comma or closing bracket) throws an error.
+     */
     @Test
     fun `should throw on invalid characters following an array value`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -219,6 +291,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that an invalid character within a literal (e.g., `true`, `false`, `null`, `Infinity`, `NaN`) throws an error.
+     */
     @Test
     fun `should throw on invalid characters in literals`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -229,6 +304,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that an unterminated escape sequence within a string (e.g., `"\` at the end of input) throws an error.
+     */
     @Test
     fun `should throw on unterminated escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -239,6 +317,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2 // Position of the '\'
     }
 
+    /**
+     * Tests that an invalid first digit in a hexadecimal escape sequence (e.g., `\xg`) throws an error.
+     */
     @Test
     fun `should throw on invalid first digits in hexadecimal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -249,6 +330,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that an invalid second digit in a hexadecimal escape sequence (e.g., `\x0g`) throws an error.
+     */
     @Test
     fun `should throw on invalid second digits in hexadecimal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -259,6 +343,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 5
     }
 
+    /**
+     * Tests that an invalid digit in a Unicode escape sequence (e.g., `\u000g`) throws an error.
+     */
     @Test
     fun `should throw on invalid unicode escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -269,6 +356,15 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 7
     }
 
+    /**
+     * Tests that an escaped digit (e.g., `\1`) throws an error.
+     * **Note on JSON5 Specification Compliance:**
+     * According to the JSON5 specification (Section 5.1 - Escapes), an escape sequence like `\1`
+     * is an "unrecognized simple escape" and should be interpreted as the character itself (i.e., the string "1").
+     * It should **not** throw an error.
+     * The current test expectation (throwing an error) is incorrect based on the spec.
+     * Both this test and the parser's behavior need correction to align with the JSON5 specification.
+     */
     @Test
     fun `should throw on escaped digits`() {
         for (i in 1..9) {
@@ -281,6 +377,10 @@ class JSON5ParseErrorsTest {
         }
     }
 
+    /**
+     * Tests that octal escape sequences (e.g., `\01`) throw an error, as they are not allowed in JSON5.
+     * Note: `\0` (null character) is a valid escape, but `\0` followed by other digits is an octal escape.
+     */
     @Test
     fun `should throw on octal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -291,6 +391,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that having multiple top-level values without being part of an array or object throws an error.
+     */
     @Test
     fun `should throw on multiple values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -301,6 +404,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3
     }
 
+    /**
+     * Tests that error messages correctly escape control characters.
+     */
     @Test
     fun `should throw with control characters escaped in the message`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -311,6 +417,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1
     }
 
+    /**
+     * Tests that an unclosed object (e.g., `{` at the end of input) throws an error.
+     */
     @Test
     fun `should throw on unclosed objects before property names`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -321,6 +430,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1 // Position of the "{"
     }
 
+    /**
+     * Tests that an unclosed object after a property name (e.g., `{a` at EOF) throws an error.
+     */
     @Test
     fun `should throw on unclosed objects after property names`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -331,6 +443,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2 // Position of the "a"
     }
 
+    /**
+     * Tests that an unclosed object after a property name and colon (e.g., `{a:` at EOF) throws an error.
+     */
     @Test
     fun `should throw on unclosed objects before property values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -341,6 +456,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 3 // Position of the ":"
     }
 
+    /**
+     * Tests that an unclosed object after a property value (e.g., `{a:1` at EOF) throws an error.
+     */
     @Test
     fun `should throw on unclosed objects after property values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -351,6 +469,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 4 // Position of the "1"
     }
 
+    /**
+     * Tests that an unclosed array (e.g., `[` at EOF) throws an error.
+     */
     @Test
     fun `should throw on unclosed arrays before values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -361,6 +482,9 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 1 // Position of the "["
     }
 
+    /**
+     * Tests that an unclosed array after a value (e.g., `[1` at EOF) throws an error.
+     */
     @Test
     fun `should throw on unclosed arrays after values`() {
         val exception = shouldThrow<JSON5Exception> {
@@ -371,6 +495,10 @@ class JSON5ParseErrorsTest {
         exception.columnNumber shouldBe 2 // Position of the "1"
     }
 
+    /**
+     * Tests various scenarios where invalid keys in an object should cause an error.
+     * This includes using literals like `null`, `true`, or numbers as unquoted keys.
+     */
     @Test
     @DisplayName("Object: should throw for invalid keys")
     fun `object invalid keys`() {
@@ -390,6 +518,9 @@ class JSON5ParseErrorsTest {
         ex3.columnNumber shouldBe 2 // '1'
     }
 
+    /**
+     * Tests various scenarios involving misplaced or extra commas in objects that should cause an error.
+     */
     @Test
     @DisplayName("Object: should throw for comma issues")
     fun `object comma issues`() {
@@ -404,6 +535,10 @@ class JSON5ParseErrorsTest {
         ex2.columnNumber shouldBe 2
     }
 
+    /**
+     * Tests various object structural issues that should cause an error.
+     * This includes missing commas between properties, missing values for keys, or missing keys.
+     */
     @Test
     @DisplayName("Object: should throw for structure issues")
     fun `object structure issues`() {
@@ -428,6 +563,10 @@ class JSON5ParseErrorsTest {
         ex4.columnNumber shouldBe 7
     }
 
+    /**
+     * Tests various scenarios involving misplaced or extra commas in arrays that should cause an error.
+     * JSON5 does not allow elision (e.g. `[1,,2]`) unlike JavaScript.
+     */
     @Test
     @DisplayName("Array: should throw for comma issues")
     fun `array comma issues`() {
@@ -447,6 +586,9 @@ class JSON5ParseErrorsTest {
         ex3.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests array structural issues, such as missing commas between elements.
+     */
     @Test
     @DisplayName("Array: should throw for structure issues")
     fun `array structure issues`() {
@@ -456,6 +598,9 @@ class JSON5ParseErrorsTest {
         ex1.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that unterminated strings (missing closing quote) throw errors.
+     */
     @Test
     @DisplayName("String: should throw for unterminated strings")
     fun `string unterminated`() {
@@ -471,6 +616,9 @@ class JSON5ParseErrorsTest {
         // ex2.columnNumber shouldBe 4
     }
 
+    /**
+     * Tests that an unescaped newline character within a string throws an error.
+     */
     @Test
     @DisplayName("String: should throw for invalid unescaped newline")
     fun `string invalid unescaped newline`() {
