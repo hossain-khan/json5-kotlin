@@ -36,7 +36,7 @@ publishing {
         register<MavenPublication>("maven") {
             groupId = "hossain.dev"
             artifactId = "json5kt"
-            version = project.findProperty("version") as String? ?: "1.0.0"
+            version = project.findProperty("version") as String? ?: error("Project property 'version' must be set")
             
             from(components["java"])
             artifact(sourcesJar)
