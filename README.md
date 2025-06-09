@@ -1,27 +1,146 @@
 # json5-kotlin
 JSON5 implementation for Kotlin/JVM
 
-> [!WARNING]  
-> This is an experimental project. It's non-functional at the moment.
+A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful features like comments, trailing commas, and unquoted keys while maintaining full backward compatibility with JSON.
 
-This project uses [Gradle](https://gradle.org/).
-To build and run the application, use the *Gradle* tool window by clicking the Gradle icon in the right-hand toolbar,
-or run it directly from the terminal:
+## Features
 
-* Run `./gradlew run` to build and run the application.
-* Run `./gradlew build` to only build the application.
-* Run `./gradlew check` to run all checks, including tests.
-* Run `./gradlew clean` to clean all build outputs.
+JSON5 extends JSON with the following features:
 
-Note the usage of the Gradle Wrapper (`./gradlew`).
-This is the suggested way to use Gradle in production projects.
+- **Comments**: `// line comments` and `/* block comments */`
+- **Trailing commas**: In objects and arrays
+- **Unquoted keys**: Object keys can be unquoted if they're valid identifiers
+- **Single quotes**: Strings can use single quotes
+- **Multi-line strings**: Strings can span multiple lines with `\` at line end
+- **Numbers**: Hexadecimal numbers, leading/trailing decimal points, explicit positive signs, infinity, and NaN
+- **Backward compatible**: All valid JSON is valid JSON5
 
-[Learn more about the Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+## Installation
 
-[Learn more about Gradle tasks](https://docs.gradle.org/current/userguide/command_line_interface.html#common_tasks).
+Add the dependency to your `build.gradle.kts`:
 
-This project follows the suggested multi-module setup and consists of the `app` and `utils` subprojects.
-The shared build logic was extracted to a convention plugin located in `buildSrc`.
+```kotlin
+dependencies {
+    implementation("io.github.json5:json5-kotlin:VERSION")
+}
+```
 
-This project uses a version catalog (see `gradle/libs.versions.toml`) to declare and version dependencies
-and both a build cache and a configuration cache (see `gradle.properties`).
+## Usage
+
+### Basic Parsing and Stringifying
+
+```kotlin
+import io.github.json5.kotlin.JSON5
+
+// Parse JSON5 to Kotlin objects
+val json5 = """
+{
+    // Configuration for my app
+    name: 'MyApp',
+    version: 2,
+    features: ['auth', 'analytics',], // trailing comma
+}
+"""
+
+val parsed = JSON5.parse(json5)
+// Returns: Map<String, Any?>
+
+// Stringify Kotlin objects to JSON5
+val data = mapOf(
+    "name" to "MyApp", 
+    "version" to 2,
+    "enabled" to true
+)
+val json5String = JSON5.stringify(data)
+// Returns: {name:'MyApp',version:2,enabled:true}
+```
+
+### Integration with kotlinx.serialization
+
+```kotlin
+import io.github.json5.kotlin.JSON5
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Config(
+    val appName: String,
+    val version: Int,
+    val features: List<String>,
+    val settings: Map<String, String>
+)
+
+// Serialize to JSON5
+val config = Config(
+    appName = "MyApp",
+    version = 2,
+    features = listOf("auth", "analytics"),
+    settings = mapOf("theme" to "dark", "lang" to "en")
+)
+
+val json5 = JSON5.encodeToString(Config.serializer(), config)
+// Result: {appName:'MyApp',version:2,features:['auth','analytics'],settings:{theme:'dark',lang:'en'}}
+
+// Deserialize from JSON5 (with comments and formatting)
+val json5WithComments = """
+{
+    // Application configuration
+    appName: 'MyApp',
+    version: 2, // current version
+    features: [
+        'auth',
+        'analytics', // trailing comma OK
+    ],
+    settings: {
+        theme: 'dark',
+        lang: 'en',
+    }
+}
+"""
+
+val decoded = JSON5.decodeFromString(Config.serializer(), json5WithComments)
+// Returns: Config instance
+```
+
+### Advanced Features
+
+```kotlin
+// JSON5 supports various number formats
+val numbers = JSON5.parse("""
+{
+    hex: 0xDECAF,
+    leadingDot: .8675309,
+    trailingDot: 8675309.,
+    positiveSign: +1,
+    scientific: 6.02e23,
+    infinity: Infinity,
+    negativeInfinity: -Infinity,
+    notANumber: NaN
+}
+""")
+
+// Multi-line strings and comments
+val complex = JSON5.parse("""
+{
+    multiLine: "This is a \
+multi-line string",
+    /* Block comment
+       spanning multiple lines */
+    singleQuoted: 'Can contain "double quotes"',
+    unquoted: 'keys work too'
+}
+""")
+```
+
+## Building the Project
+
+This project uses [Gradle](https://gradle.org/) with Java 21:
+
+```bash
+./gradlew build    # Build the library
+./gradlew test     # Run tests
+./gradlew check    # Run all checks including tests
+```
+
+## License
+
+This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
