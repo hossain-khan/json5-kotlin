@@ -1,0 +1,37 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+          cache: gradle
+
+      # https://github.com/gradle/actions/blob/main/docs/setup-gradle.md#build-with-a-specific-gradle-version
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.2' # Quotes required to prevent YAML converting to number
+
+      - name: Run benchmark
+        run: gradle :benchmark:run
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            benchmark/benchmark_results_*.csv
+            benchmark/benchmark_summary_*.txt
+          retention-days: 30
