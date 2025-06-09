@@ -29,3 +29,7 @@ replay_pid*
 .gradle
 .idea
 build/
+
+# Benchmark result files
+benchmark_results_*.csv
+benchmark_summary_*.txt
