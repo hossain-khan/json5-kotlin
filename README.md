@@ -6,7 +6,7 @@ A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful f
 
 ## Features
 
-JSON5 extends JSON with the following features:
+[JSON5](https://json5.org/) extends JSON with the following features:
 
 - **Comments**: `// line comments` and `/* block comments */`
 - **Trailing commas**: In objects and arrays
