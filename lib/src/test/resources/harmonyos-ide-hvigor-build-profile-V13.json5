@@ -1,0 +1,130 @@
+{
+  "app": { 
+    // Signature information of the project. Multiple signatures can be included.
+    "signingConfigs": [  
+      {
+        "name": "default",  // Name of the signature scheme, which can be customized
+        "type": "HarmonyOS",  // Identifier of the app, which is HarmonyOS.
+        // Material of the signature scheme.
+        "material": {  
+          "certpath": "D:\\SigningConfig\\debug_hos.cer",  // Debug or release certificate file in .cer format.
+          "storePassword": "******",  // Keystore password, which is displayed in ciphertext.
+          "keyAlias": "debugKey",  // Key alias.
+          "keyPassword": "******",  // Key password, which is displayed in ciphertext.
+          "profile": "D:\\SigningConfig\\debug_hos.p7b",  // Debug or release profile file in .p7b format.
+          "signAlg": "SHA256withECDSA",  // Keystore signing algorithm.
+          "storeFile": "D:\\SigningConfig\\debug_hos.p12"  // Keystore file in .p12 format.
+        }
+      }
+    ],
+    // Product category, such as the general default edition, paid edition, and free edition.
+    "products": [  
+      {
+        "name": "default",  // Product name. Multiple custom products can be configured.
+        "signingConfig": "default",  // Signature information for the current product. It must be defined in signingConfigs.
+        "compatibleSdkVersion": "5.0.1(13)",  // Earliest version compatible with the app/atomic service.
+        "targetSdkVersion": "5.0.1(13)",  // Target version of the app/atomic service.
+        "runtimeOS": "HarmonyOS",  // Runtime operating system.
+      }
+    ],
+    // Build mode set. Each build mode refers to a collection of build configurations used for a target task. By default, debug is used for HAP packing, and release is used for app packing.
+    "buildModeSet": [
+      {
+        "name": "debug",   // Type name of the build mode. Three values are provided by default: test, debug, and release. You can also customize the type name.
+        "buildOption": {   // Related configuration used during build.
+          "packOptions": {  // Packing configuration, which can be used to avoid generating a signed HAP during app build.
+            "buildAppSkipSignHap": false
+          },
+          "debuggable": true,
+          "resOptions": {
+            "compression": {
+              "media": {
+                "enable": true // Set whether to enable texture compression for media images.
+              },
+              // File filter for texture compression, which is optional. If it is not specified, texture compression is performed on all images in the resource directory.
+              "filters": [
+                {
+                  "method": {
+                    "type": "sut", // Conversion type.
+                    "blocks": "4x4" // Extended parameter of the conversion type.
+                  },
+                  // Specify the files to be compressed. Only the files that meet all conditions and are not filtered by exclude can be compressed.
+                  "files": {
+                    "path": ["./**/*"], // Specify all files in the resource directory.
+                    "size": [[0, '10k']], // Specify files smaller than 10 KB.
+                    // Specify images with a resolution less than 2048 x 2048.
+                    "resolution": [
+                      [
+                        { "width": 0, "height": 0 }, // Minimum width and height.
+                        { "width": 2048, "height": 2048 } // Maximum width and height.
+                      ]
+                    ]
+                  },
+                  // Exclude files from files that do not need to be compressed; only files that meet all filtering conditions are excluded.
+                  "exclude": {
+                    "path": ["./**/*.jpg"], // Filter out all .jpg files.
+                    "size": [[0, '1k']], // Filter out files smaller than 1 KB.
+                    // Filter out images with a resolution less than 1024 x 1024.
+                    "resolution": [
+                      [
+                        { "width": 0, "height": 0 }, // Minimum width and height.
+                        { "width": 1024, "height": 1024 } // Maximum width and height.
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+    // CPP compilation configuration.
+          "externalNativeOptions": {
+            "path": "./entry/src/main/cpp/CMakeLists.txt",  // Path of the CMake configuration file, which provides the CMake build script.
+            "arguments": [],  // Optional build parameters passed to CMake.
+            "abiFilters": [  // Supported ABI build environment.
+              "arm64-v8a",
+              "x86_64"
+            ],
+            "cppFlags": ""  // Optional parameters of the C++ compiler.
+          },
+          "sourceOption": {   // Different tags are used to classify source code so that different source code can be processed differently during build.
+            "workers": []
+          },
+          // Rule for filtering the .so resource files on which the HAR depends.
+          "nativeLib": {
+             "filter": {
+               // Pack the .so file with the highest priority based on the priority of the .so files.
+               "pickFirsts": [
+                 "**/1.so"
+               ],
+               // Pack the .so file with the lowest priority based on the priority of the .so files.
+               "pickLasts": [
+                 "**/2.so"
+               ],
+               // Exclude .so files that match the regular expression. The matches are not be packaged.
+               "excludes": [
+                 "**/3.so", // Exclude all .so files whose names are 3.
+                 "**/x86_64/*.so" // Exclude all .so files of the x86_64 architecture.
+               ],
+               // Allow the .so file with a higher priority to overwrite the .so file with a lower priority when these files have the same name.
+               "enableOverride": true
+            }
+          },
+        }
+      }   
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",  // Module name, which must be the same as module.name in the module.json5 file of the module.
+      "srcPath": "./entry",  // Path of the module root directory relative to the project root directory.
+      "targets": [  // App Pack build targets, jointly defined by product and module-level targets settings.
+        {
+          "name": "default",  // Name of the build targets, defined by the targets item in the module-level build-profile.json5 file.
+          "applyToProducts": [  
+            "default"   // Product to which the default target of the module will be packed.
+          ]
+        }
+      ]
+    }
+  ]
+}
