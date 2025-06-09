@@ -5,11 +5,15 @@ plugins {
 
     // Apply the Application plugin to add support for building an executable JVM application.
     application
+
+    kotlin("plugin.serialization") version "1.9.23"
 }
 
 dependencies {
     // Project "app" depends on project "lib"
     implementation(project(":lib"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
 
 application {
