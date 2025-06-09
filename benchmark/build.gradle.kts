@@ -11,6 +11,9 @@ dependencies {
     
     // kotlinx.serialization for JSON comparison
     implementation(libs.bundles.kotlinxEcosystem)
+    
+    // External JSON5 library for comparison
+    implementation("at.syntaxerror:json5:2.1.0")
 
     // Test dependencies
     testImplementation(kotlin("test"))

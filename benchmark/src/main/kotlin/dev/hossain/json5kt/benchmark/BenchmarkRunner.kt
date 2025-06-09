@@ -117,16 +117,35 @@ object BenchmarkRunner {
                 
                 val json5Result = resultList.find { it.format == "JSON5" }
                 val jsonResult = resultList.find { it.format == "JSON" }
+                val externalJson5Result = resultList.find { it.format == "External-JSON5" }
                 
-                if (json5Result != null && jsonResult != null) {
-                    appendLine("  JSON5: ${String.format("%.3f", json5Result.averageTimeMillis)} ms avg")
-                    appendLine("  JSON:  ${String.format("%.3f", jsonResult.averageTimeMillis)} ms avg")
+                if (json5Result != null && jsonResult != null && externalJson5Result != null) {
+                    appendLine("  JSON5:         ${String.format("%.3f", json5Result.averageTimeMillis)} ms avg")
+                    appendLine("  JSON:          ${String.format("%.3f", jsonResult.averageTimeMillis)} ms avg")
+                    appendLine("  External-JSON5: ${String.format("%.3f", externalJson5Result.averageTimeMillis)} ms avg")
                     
-                    val speedup = json5Result.averageTimeMillis / jsonResult.averageTimeMillis
-                    if (speedup > 1.0) {
-                        appendLine("  → JSON is ${String.format("%.2f", speedup)}x faster than JSON5")
+                    // Compare all libraries
+                    val json5VsJson = json5Result.averageTimeMillis / jsonResult.averageTimeMillis
+                    val externalVsJson = externalJson5Result.averageTimeMillis / jsonResult.averageTimeMillis
+                    val json5VsExternal = json5Result.averageTimeMillis / externalJson5Result.averageTimeMillis
+                    
+                    appendLine("  Comparisons:")
+                    if (json5VsJson > 1.0) {
+                        appendLine("    → JSON is ${String.format("%.2f", json5VsJson)}x faster than JSON5")
                     } else {
-                        appendLine("  → JSON5 is ${String.format("%.2f", 1.0 / speedup)}x faster than JSON")
+                        appendLine("    → JSON5 is ${String.format("%.2f", 1.0 / json5VsJson)}x faster than JSON")
+                    }
+                    
+                    if (externalVsJson > 1.0) {
+                        appendLine("    → JSON is ${String.format("%.2f", externalVsJson)}x faster than External-JSON5")
+                    } else {
+                        appendLine("    → External-JSON5 is ${String.format("%.2f", 1.0 / externalVsJson)}x faster than JSON")
+                    }
+                    
+                    if (json5VsExternal > 1.0) {
+                        appendLine("    → External-JSON5 is ${String.format("%.2f", json5VsExternal)}x faster than JSON5")
+                    } else {
+                        appendLine("    → JSON5 is ${String.format("%.2f", 1.0 / json5VsExternal)}x faster than External-JSON5")
                     }
                 }
                 appendLine()
@@ -136,18 +155,37 @@ object BenchmarkRunner {
             appendLine("Overall Statistics:")
             val json5Results = results.filter { it.format == "JSON5" }
             val jsonResults = results.filter { it.format == "JSON" }
+            val externalJson5Results = results.filter { it.format == "External-JSON5" }
             
             val avgJson5Time = json5Results.map { it.averageTimeMillis }.average()
             val avgJsonTime = jsonResults.map { it.averageTimeMillis }.average()
+            val avgExternalJson5Time = externalJson5Results.map { it.averageTimeMillis }.average()
             
-            appendLine("Average JSON5 time: ${String.format("%.3f", avgJson5Time)} ms")
-            appendLine("Average JSON time:  ${String.format("%.3f", avgJsonTime)} ms")
+            appendLine("Average JSON5 time:         ${String.format("%.3f", avgJson5Time)} ms")
+            appendLine("Average JSON time:          ${String.format("%.3f", avgJsonTime)} ms")
+            appendLine("Average External-JSON5 time: ${String.format("%.3f", avgExternalJson5Time)} ms")
             
-            val overallSpeedup = avgJson5Time / avgJsonTime
-            if (overallSpeedup > 1.0) {
-                appendLine("Overall: JSON is ${String.format("%.2f", overallSpeedup)}x faster than JSON5")
+            val json5VsJson = avgJson5Time / avgJsonTime
+            val externalVsJson = avgExternalJson5Time / avgJsonTime
+            val json5VsExternal = avgJson5Time / avgExternalJson5Time
+            
+            appendLine("\nOverall Comparisons:")
+            if (json5VsJson > 1.0) {
+                appendLine("  → JSON is ${String.format("%.2f", json5VsJson)}x faster than JSON5")
             } else {
-                appendLine("Overall: JSON5 is ${String.format("%.2f", 1.0 / overallSpeedup)}x faster than JSON")
+                appendLine("  → JSON5 is ${String.format("%.2f", 1.0 / json5VsJson)}x faster than JSON")
+            }
+            
+            if (externalVsJson > 1.0) {
+                appendLine("  → JSON is ${String.format("%.2f", externalVsJson)}x faster than External-JSON5")
+            } else {
+                appendLine("  → External-JSON5 is ${String.format("%.2f", 1.0 / externalVsJson)}x faster than JSON")
+            }
+            
+            if (json5VsExternal > 1.0) {
+                appendLine("  → External-JSON5 is ${String.format("%.2f", json5VsExternal)}x faster than JSON5")
+            } else {
+                appendLine("  → JSON5 is ${String.format("%.2f", 1.0 / json5VsExternal)}x faster than External-JSON5")
             }
         }
         
@@ -161,9 +199,10 @@ object BenchmarkRunner {
             val (dataType, operation) = key.split("_")
             val json5Result = resultList.find { it.format == "JSON5" }
             val jsonResult = resultList.find { it.format == "JSON" }
+            val externalJson5Result = resultList.find { it.format == "External-JSON5" }
             
-            if (json5Result != null && jsonResult != null) {
-                println("$dataType $operation: JSON5=${String.format("%.3f", json5Result.averageTimeMillis)}ms, JSON=${String.format("%.3f", jsonResult.averageTimeMillis)}ms")
+            if (json5Result != null && jsonResult != null && externalJson5Result != null) {
+                println("$dataType $operation: JSON5=${String.format("%.3f", json5Result.averageTimeMillis)}ms, JSON=${String.format("%.3f", jsonResult.averageTimeMillis)}ms, External-JSON5=${String.format("%.3f", externalJson5Result.averageTimeMillis)}ms")
             }
         }
     }
