@@ -46,4 +46,4 @@ jobs:
         env:
           USERNAME: ${{ github.actor }}        # GitHub username of the user/bot triggering the workflow
           TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub token with packages:write permission
-        run: gradle publish
+        run: ./gradlew publish
