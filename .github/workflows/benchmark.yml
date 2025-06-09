@@ -14,18 +14,12 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '23'
+          java-version: '21'
           distribution: 'temurin'
           cache: gradle
 
-      # https://github.com/gradle/actions/blob/main/docs/setup-gradle.md#build-with-a-specific-gradle-version
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.14.2' # Quotes required to prevent YAML converting to number
-
       - name: Run benchmark
-        run: gradle :benchmark:run
+        run: ./gradlew :benchmark:run
 
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4
