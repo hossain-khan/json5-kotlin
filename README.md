@@ -20,10 +20,39 @@ JSON5 extends JSON with the following features:
 Add the dependency to your `build.gradle.kts`:
 
 ```kotlin
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/hossain-khan/json5-kotlin")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
+}
+
 dependencies {
-    implementation("io.github.json5:json5-kotlin:VERSION")
+    implementation("hossain.dev:json5kt:1.0.0")
 }
 ```
+
+### Authentication for GitHub Packages
+
+To access GitHub Packages, you need to authenticate with GitHub. You can do this by:
+
+1. **Using environment variables:**
+   ```bash
+   export USERNAME=your_github_username
+   export TOKEN=your_github_personal_access_token
+   ```
+
+2. **Using gradle.properties:**
+   ```properties
+   gpr.user=your_github_username
+   gpr.key=your_github_personal_access_token
+   ```
+
+You can generate a personal access token at [GitHub > Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) with `read:packages` permission.
 
 ## Usage
 
