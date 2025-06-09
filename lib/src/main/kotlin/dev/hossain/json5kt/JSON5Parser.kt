@@ -3,6 +3,13 @@ package dev.hossain.json5kt
 /**
  * Parser for JSON5 syntax
  * Converts JSON5 text into Kotlin objects
+ * 
+ * **Performance Optimizations:**
+ * - Uses LinkedHashMap with initial capacity for better memory allocation
+ * - Uses ArrayList with pre-sizing for array parsing
+ * - Optimized object and array parsing methods
+ * 
+ * @since 1.1.0 Performance improvements for faster JSON5 parsing
  */
 internal object JSON5Parser {
     /**
@@ -118,8 +125,12 @@ internal object JSON5Parser {
         }
     }
 
+    /**
+     * Optimized object parsing with efficient map allocation.
+     */
     private fun parseObject(lexer: JSON5Lexer): Map<String, Any?> {
-        val result = mutableMapOf<String, Any?>()
+        // Use LinkedHashMap to preserve order and start with reasonable initial capacity
+        val result = LinkedHashMap<String, Any?>(8)
         var token = lexer.nextToken()
 
         // Handle empty object
@@ -194,8 +205,12 @@ internal object JSON5Parser {
         return result
     }
 
+    /**
+     * Optimized array parsing with efficient list allocation.
+     */
     private fun parseArray(lexer: JSON5Lexer): List<Any?> {
-        val result = mutableListOf<Any?>()
+        // Use ArrayList with reasonable initial capacity
+        val result = ArrayList<Any?>(8)
         var token = lexer.nextToken()
 
         // Handle empty array
