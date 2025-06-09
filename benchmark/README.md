@@ -68,7 +68,7 @@ ComplexPerson Serialization: JSON5=0.083ms, JSON=0.015ms
 Company Serialization: JSON5=0.200ms, JSON=0.032ms
 ```
 
-### Snapshot
+### Benchmark Result Snapshot
 
 | Case                | Type            | JSON5 Avg (ms) | JSON Avg (ms) | Speedup (JSON) |
 | ------------------- | --------------- | -------------- | ------------- | -------------- |
@@ -92,3 +92,6 @@ Company Serialization: JSON5=0.200ms, JSON=0.032ms
 * JSON5: **0.158 ms**
 * JSON: **0.036 ms**
 * 🔥 Overall: **KotlinX JSON is 4.33× faster than JSON5**
+
+
+<img width="800" alt="benchmark bar chart" src="https://github.com/user-attachments/assets/bcf44217-827b-49a1-a18b-4a0f7fedc103" />
