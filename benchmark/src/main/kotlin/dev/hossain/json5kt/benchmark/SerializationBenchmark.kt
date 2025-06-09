@@ -6,6 +6,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.serializer
 import kotlin.system.measureNanoTime
+import at.syntaxerror.json5.*
 
 /**
  * Benchmark class for comparing JSON5 and standard JSON performance.
@@ -35,6 +36,35 @@ class SerializationBenchmark {
             fun csvHeader(): String {
                 return "Operation,DataType,Format,Iterations,TotalTimeNanos,AverageTimeNanos,AverageTimeMicros,AverageTimeMillis"
             }
+        }
+    }
+    
+    /**
+     * Converts a kotlinx.serialization object to a plain object that can be used with the external JSON5 library.
+     * This is done by serializing to JSON with kotlinx.serialization and then parsing with external JSON5 library.
+     */
+    private fun <T> convertToPlainObject(data: T, serializer: kotlinx.serialization.SerializationStrategy<T>): Any? {
+        val jsonString = json.encodeToString(serializer, data)
+        val parser = JSONParser(jsonString)
+        return parser.nextValue()
+    }
+    
+    /**
+     * Converts a JSON5 string to a plain object using the external JSON5 library.
+     */
+    private fun parseWithExternalLibrary(json5String: String): Any? {
+        val parser = JSONParser(json5String)
+        return parser.nextValue()
+    }
+    
+    /**
+     * Converts a plain object to JSON5 string using the external JSON5 library.
+     */
+    private fun stringifyWithExternalLibrary(obj: Any?): String {
+        return when (obj) {
+            is JSONObject -> JSONStringify.toString(obj, 0)
+            is JSONArray -> JSONStringify.toString(obj, 0)
+            else -> obj?.toString() ?: "null"
         }
     }
     
@@ -86,6 +116,27 @@ class SerializationBenchmark {
                 averageTimeNanos = jsonSerializationTime / iterations,
                 averageTimeMicros = (jsonSerializationTime / iterations) / 1000.0,
                 averageTimeMillis = (jsonSerializationTime / iterations) / 1_000_000.0
+            )
+        )
+        
+        // Benchmark external JSON5 library serialization
+        val externalJson5Object = convertToPlainObject(data, serializer)
+        val externalJson5SerializationTime = measureNanoTime {
+            repeat(iterations) {
+                stringifyWithExternalLibrary(externalJson5Object)
+            }
+        }
+        
+        results.add(
+            BenchmarkResult(
+                operation = "Serialization",
+                dataType = dataTypeName,
+                format = "External-JSON5",
+                iterations = iterations,
+                totalTimeNanos = externalJson5SerializationTime,
+                averageTimeNanos = externalJson5SerializationTime / iterations,
+                averageTimeMicros = (externalJson5SerializationTime / iterations) / 1000.0,
+                averageTimeMillis = (externalJson5SerializationTime / iterations) / 1_000_000.0
             )
         )
         
@@ -141,6 +192,26 @@ class SerializationBenchmark {
                 averageTimeNanos = jsonDeserializationTime / iterations,
                 averageTimeMicros = (jsonDeserializationTime / iterations) / 1000.0,
                 averageTimeMillis = (jsonDeserializationTime / iterations) / 1_000_000.0
+            )
+        )
+        
+        // Benchmark external JSON5 library deserialization
+        val externalJson5DeserializationTime = measureNanoTime {
+            repeat(iterations) {
+                parseWithExternalLibrary(json5String)
+            }
+        }
+        
+        results.add(
+            BenchmarkResult(
+                operation = "Deserialization",
+                dataType = dataTypeName,
+                format = "External-JSON5",
+                iterations = iterations,
+                totalTimeNanos = externalJson5DeserializationTime,
+                averageTimeNanos = externalJson5DeserializationTime / iterations,
+                averageTimeMicros = (externalJson5DeserializationTime / iterations) / 1000.0,
+                averageTimeMillis = (externalJson5DeserializationTime / iterations) / 1_000_000.0
             )
         )
         

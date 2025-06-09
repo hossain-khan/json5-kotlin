@@ -45,18 +45,22 @@ class BenchmarkTest {
         assertNotNull(results)
         assertTrue(results.isNotEmpty())
         
-        // Should have 4 results: JSON5 and JSON for both serialization and deserialization
-        assertEquals(4, results.size)
+        // Should have 6 results: JSON5, JSON, and External-JSON5 for both serialization and deserialization
+        assertEquals(6, results.size)
         
         val json5SerializationResult = results.find { it.format == "JSON5" && it.operation == "Serialization" }
         val jsonSerializationResult = results.find { it.format == "JSON" && it.operation == "Serialization" }
+        val externalJson5SerializationResult = results.find { it.format == "External-JSON5" && it.operation == "Serialization" }
         val json5DeserializationResult = results.find { it.format == "JSON5" && it.operation == "Deserialization" }
         val jsonDeserializationResult = results.find { it.format == "JSON" && it.operation == "Deserialization" }
+        val externalJson5DeserializationResult = results.find { it.format == "External-JSON5" && it.operation == "Deserialization" }
         
         assertNotNull(json5SerializationResult)
         assertNotNull(jsonSerializationResult)
+        assertNotNull(externalJson5SerializationResult)
         assertNotNull(json5DeserializationResult)
         assertNotNull(jsonDeserializationResult)
+        assertNotNull(externalJson5DeserializationResult)
         
         // Verify basic properties
         assertEquals("TestPerson", json5SerializationResult!!.dataType)
