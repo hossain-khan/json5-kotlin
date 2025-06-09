@@ -203,4 +203,61 @@ class JSON5ParserTextExampleFiles {
 
         assertEquals(expected, result)
     }
+
+    /**
+     * Tests parsing of a real-world HarmonyOS IDE hvigor build profile from `harmonyos-ide-hvigor-build-profile-V13.json5`.
+     * This file represents a complex build configuration with nested objects, arrays, 
+     * and extensive use of JSON5 features like comments and trailing commas.
+     */
+    @Test
+    fun testParseHarmonyOSBuildProfileJson5() {
+        val path = Paths.get("src/test/resources/harmonyos-ide-hvigor-build-profile-V13.json5")
+        val json5Text = Files.readString(path)
+        val result = JSON5Parser.parse(json5Text)
+
+        // Validate basic structure and key properties
+        val resultMap = result as Map<*, *>
+        assert(resultMap.containsKey("app")) { "Should contain 'app' key" }
+        assert(resultMap.containsKey("modules")) { "Should contain 'modules' key" }
+
+        val app = resultMap["app"] as Map<*, *>
+        assert(app.containsKey("signingConfigs")) { "App should contain 'signingConfigs'" }
+        assert(app.containsKey("products")) { "App should contain 'products'" }
+        assert(app.containsKey("buildModeSet")) { "App should contain 'buildModeSet'" }
+
+        val modules = resultMap["modules"] as List<*>
+        assert(modules.isNotEmpty()) { "Modules should not be empty" }
+        val firstModule = modules.first() as Map<*, *>
+        assertEquals("entry", firstModule["name"]) { "First module name should be 'entry'" }
+        assertEquals("./entry", firstModule["srcPath"]) { "First module srcPath should be './entry'" }
+    }
+
+    /**
+     * Tests parsing of a real-world Blink renderer core frame settings from `blink-renderer-core-frame-settings.json5`.
+     * This file represents a comprehensive configuration with parameters and data arrays,
+     * demonstrating JSON5's capability to handle large, complex configuration files with comments.
+     */
+    @Test
+    fun testParseBlinkRendererFrameSettingsJson5() {
+        val path = Paths.get("src/test/resources/blink-renderer-core-frame-settings.json5")
+        val json5Text = Files.readString(path)
+        val result = JSON5Parser.parse(json5Text)
+
+        // Validate basic structure and key properties
+        val resultMap = result as Map<*, *>
+        assert(resultMap.containsKey("parameters")) { "Should contain 'parameters' key" }
+        assert(resultMap.containsKey("data")) { "Should contain 'data' key" }
+
+        val parameters = resultMap["parameters"] as Map<*, *>
+        assert(parameters.containsKey("type")) { "Parameters should contain 'type'" }
+        assert(parameters.containsKey("include_paths")) { "Parameters should contain 'include_paths'" }
+        assert(parameters.containsKey("initial")) { "Parameters should contain 'initial'" }
+        assert(parameters.containsKey("invalidate")) { "Parameters should contain 'invalidate'" }
+
+        val data = resultMap["data"] as List<*>
+        assert(data.isNotEmpty()) { "Data should not be empty" }
+        val firstDataItem = data.first() as Map<*, *>
+        assertEquals("defaultTextEncodingName", firstDataItem["name"]) { "First data item name should be 'defaultTextEncodingName'" }
+        assertEquals("String", firstDataItem["type"]) { "First data item type should be 'String'" }
+    }
 }
