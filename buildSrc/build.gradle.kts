@@ -6,7 +6,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(21) // Changed from 23 to 21
+    jvmToolchain(17) // Use Java 17 to match available JVM
 }
 
 dependencies {
