@@ -1,6 +1,6 @@
 package org.json5.app
 
-import io.github.json5.kotlin.JSON5
+import dev.hossain.json5kt.JSON5
 
 fun main() {
     val json5files = listOf(
