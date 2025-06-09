@@ -28,9 +28,6 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
-      - name: Grant execute permission for Gradle wrapper
-        run: chmod +x ./gradlew
-
       # CONFIGURATION REQUIRED:
       # The following step publishes to GitHub Packages using credentials.
       # No additional setup is needed as the project already has:
@@ -45,9 +42,8 @@ jobs:
       # 1. Create a Personal Access Token (PAT) with 'write:packages' permission
       # 2. Add it as a repository secret (e.g., PACKAGES_TOKEN)
       # 3. Use that secret instead of GITHUB_TOKEN
-      #
       - name: Publish to GitHub Packages
         env:
           USERNAME: ${{ github.actor }}        # GitHub username of the user/bot triggering the workflow
           TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub token with packages:write permission
-        run: ./gradlew publish
+        run: gradle publish

@@ -57,7 +57,7 @@ publishing {
                     developer {
                         id.set("hossain-khan")
                         name.set("Hossain Khan")
-                        email.set("hossain@hossain.dev")
+                        email.set("eng@hossain.dev")
                     }
                 }
                 
