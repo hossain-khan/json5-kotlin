@@ -4,9 +4,6 @@ This is a Kotlin based repository with a JSON5 library for parsing and serializi
 
 ## Code Standards
 
-### Pre-setup
-Do not try to use the `./gradlew` script to run the project. Instead, use `gradle` binary directly. Use the latest Gradle version compatible with the project.
-
 ### Development Flow
 - Build: `gradle build`
 - Test: `gradle check`
