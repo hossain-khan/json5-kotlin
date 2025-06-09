@@ -46,11 +46,6 @@ jobs:
       # 2. Add it as a repository secret (e.g., PACKAGES_TOKEN)
       # 3. Use that secret instead of GITHUB_TOKEN
       #
-      # The current version is hardcoded in lib/build.gradle.kts as "1.0.0"
-      # For dynamic versioning, consider:
-      # 1. Using the git tag (${GITHUB_REF#refs/tags/})
-      # 2. Reading version from gradle.properties
-      # 3. Using a gradle plugin like 'axion-release-plugin'
       - name: Publish to GitHub Packages
         env:
           USERNAME: ${{ github.actor }}        # GitHub username of the user/bot triggering the workflow
