@@ -2,6 +2,14 @@ package dev.hossain.json5kt
 
 /**
  * JSON5Serializer is responsible for serializing Kotlin objects to JSON5 text.
+ * 
+ * **Performance Optimizations:**
+ * - Fast path for simple strings that don't require escaping
+ * - Pre-allocated StringBuilder with estimated capacity
+ * - Efficient character handling in string serialization
+ * - Pre-sized collections for object and array serialization
+ * 
+ * @since 1.1.0 Performance improvements for faster JSON5 string generation
  */
 internal object JSON5Serializer {
     /**
@@ -63,10 +71,20 @@ internal object JSON5Serializer {
             }
         }
 
+        /**
+         * Optimized string serialization with reduced allocations.
+         * Pre-calculates required capacity and uses efficient character handling.
+         */
         private fun serializeString(value: String): String {
-            val sb = StringBuilder()
+            // Fast path for simple strings that don't need escaping
+            if (value.none { it < ' ' || it == '\\' || it == '\'' || it == '"' || it == '\b' || it == '\u000C' || it == '\n' || it == '\r' || it == '\t' || it == '\u000B' || it == '\u0000' || it == '\u2028' || it == '\u2029' }) {
+                val quote = if (value.contains('\'') && !value.contains('"')) '"' else '\''
+                return "$quote$value$quote"
+            }
+            
             val quote = if (value.contains('\'') && !value.contains('"')) '"' else '\''
-
+            // Pre-allocate with estimated capacity to reduce resizing
+            val sb = StringBuilder(value.length + 10)
             sb.append(quote)
 
             for (char in value) {
@@ -86,7 +104,9 @@ internal object JSON5Serializer {
                             char == quote -> sb.append("\\").append(quote)
                             char < ' ' -> {
                                 val hexString = char.code.toString(16)
-                                sb.append("\\x").append("0".repeat(2 - hexString.length)).append(hexString)
+                                sb.append("\\x")
+                                if (hexString.length == 1) sb.append("0")
+                                sb.append(hexString)
                             }
                             else -> sb.append(char)
                         }
@@ -98,6 +118,9 @@ internal object JSON5Serializer {
             return sb.toString()
         }
 
+        /**
+         * Optimized object serialization with reduced allocations.
+         */
         private fun serializeObject(obj: Map<Any?, Any?>, indent: String): String {
             if (obj.isEmpty()) return "{}"
 
@@ -114,17 +137,21 @@ internal object JSON5Serializer {
                 indent
             }
 
-            val properties = obj.entries.map { (key, value) ->
+            // Pre-allocate list with known size for better performance
+            val properties = ArrayList<String>(obj.size)
+            
+            for ((key, value) in obj) {
                 val keyStr = key.toString()
                 val propName = serializePropertyName(keyStr)
                 val propValue = serializeValue(value, newIndent)
 
-                if (gap.isNotEmpty()) {
-                    // This is the fix: Use exactly one space after the colon when formatting
+                val property = if (gap.isNotEmpty()) {
+                    // Use exactly one space after the colon when formatting
                     "$newIndent$propName: $propValue"
                 } else {
                     "$propName:$propValue"
                 }
+                properties.add(property)
             }
 
             val joined = if (gap.isNotEmpty()) {
@@ -170,6 +197,9 @@ internal object JSON5Serializer {
             return true
         }
 
+        /**
+         * Optimized array serialization with reduced allocations.
+         */
         private fun serializeArray(array: List<*>, indent: String): String {
             if (array.isEmpty()) return "[]"
 
@@ -186,13 +216,17 @@ internal object JSON5Serializer {
                 indent
             }
 
-            val elements = array.map { value ->
+            // Pre-allocate list with known size for better performance
+            val elements = ArrayList<String>(array.size)
+            
+            for (value in array) {
                 val serialized = serializeValue(value, newIndent)
-                if (gap.isNotEmpty()) {
+                val element = if (gap.isNotEmpty()) {
                     "$newIndent$serialized"
                 } else {
                     serialized
                 }
+                elements.add(element)
             }
 
             val joined = if (gap.isNotEmpty()) {
