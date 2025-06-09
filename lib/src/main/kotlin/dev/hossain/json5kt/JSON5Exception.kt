@@ -1,4 +1,4 @@
-package io.github.json5.kotlin
+package dev.hossain.json5kt
 
 /**
  * Exception thrown when there's an error parsing JSON5 input.

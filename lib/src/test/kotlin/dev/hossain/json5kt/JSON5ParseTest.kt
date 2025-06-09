@@ -1,4 +1,4 @@
-package io.github.json5.kotlin
+package dev.hossain.json5kt
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe

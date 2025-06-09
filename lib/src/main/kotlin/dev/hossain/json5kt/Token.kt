@@ -1,4 +1,4 @@
-package io.github.json5.kotlin
+package dev.hossain.json5kt
 
 /**
  * Represents a token in the JSON5 syntax.
