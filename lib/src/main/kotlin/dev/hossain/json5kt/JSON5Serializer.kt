@@ -1,4 +1,4 @@
-package io.github.json5.kotlin
+package dev.hossain.json5kt
 
 /**
  * JSON5Serializer is responsible for serializing Kotlin objects to JSON5 text.

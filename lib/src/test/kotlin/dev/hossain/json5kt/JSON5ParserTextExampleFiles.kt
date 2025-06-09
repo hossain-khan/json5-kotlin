@@ -1,4 +1,4 @@
-package io.github.json5.kotlin
+package dev.hossain.json5kt
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

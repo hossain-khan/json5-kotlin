@@ -30,7 +30,7 @@ dependencies {
 ### Basic Parsing and Stringifying
 
 ```kotlin
-import io.github.json5.kotlin.JSON5
+import dev.hossain.json5kt.JSON5
 
 // Parse JSON5 to Kotlin objects
 val json5 = """
@@ -58,7 +58,7 @@ val json5String = JSON5.stringify(data)
 ### Integration with kotlinx.serialization
 
 ```kotlin
-import io.github.json5.kotlin.JSON5
+import dev.hossain.json5kt.JSON5
 import kotlinx.serialization.Serializable
 
 @Serializable
