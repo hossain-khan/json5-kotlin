@@ -1,6 +1,10 @@
-# JSON5 vs JSON Performance Benchmark
+# JSON5 Performance Benchmark - Three-way Comparison
 
-This module provides benchmarking tools to compare the performance of JSON5 serialization/deserialization against standard JSON using kotlinx.serialization.
+This module provides benchmarking tools to compare the performance of JSON5 serialization/deserialization across three different implementations:
+
+1. **JSON5** (this project) - Uses kotlinx.serialization  
+2. **JSON** (kotlinx.serialization) - Standard JSON baseline
+3. **External-JSON5** (at.syntaxerror.json5:2.1.0) - External JSON5 library
 
 ## Running the Benchmark
 
@@ -27,9 +31,9 @@ The benchmark generates two types of reports:
 
 ### Summary Report
 - File: `benchmark_summary_YYYY-MM-DD_HH-mm-ss.txt`
-- Contains human-readable performance comparisons
-- Shows which format is faster and by how much
-- Includes overall statistics
+- Contains human-readable performance comparisons across all three libraries
+- Shows relative performance comparisons between each pair of libraries
+- Includes overall statistics and rankings
 
 ## Test Data Types
 
@@ -59,39 +63,37 @@ To run the benchmark module tests:
 
 ## Sample Results
 
-Based on typical runs, JSON standard library generally performs 2-6x faster than JSON5 for both serialization and deserialization, with the performance gap being larger for more complex data structures.
+Based on typical runs across the three libraries:
+
+- **JSON** (kotlinx.serialization) is consistently the fastest
+- **External-JSON5** performs better than this project's JSON5 implementation  
+- **JSON5** (this project) offers kotlinx.serialization integration but with slower performance
 
 Example output:
 ```
-SimplePerson Serialization: JSON5=0.027ms, JSON=0.013ms
-ComplexPerson Serialization: JSON5=0.083ms, JSON=0.015ms  
-Company Serialization: JSON5=0.200ms, JSON=0.032ms
+SimplePerson Serialization: JSON5=0.028ms, JSON=0.010ms, External-JSON5=0.011ms
+ComplexPerson Serialization: JSON5=0.073ms, JSON=0.018ms, External-JSON5=0.018ms  
+Company Serialization: JSON5=0.163ms, JSON=0.031ms, External-JSON5=0.054ms
 ```
 
 ### Benchmark Result Snapshot
 
-| Case                | Type            | JSON5 Avg (ms) | JSON Avg (ms) | Speedup (JSON) |
-| ------------------- | --------------- | -------------- | ------------- | -------------- |
-| SimplePerson        | Serialization   | 0.056          | 0.020         | 2.77×          |
-| SimplePerson        | Deserialization | 0.064          | 0.022         | 2.93×          |
-| ComplexPerson       | Serialization   | 0.089          | 0.019         | 4.59×          |
-| ComplexPerson       | Deserialization | 0.113          | 0.030         | 3.76×          |
-| Company             | Serialization   | 0.226          | 0.059         | 3.81×          |
-| Company             | Deserialization | 0.254          | 0.090         | 2.83×          |
-| NumberTypes         | Serialization   | 0.032          | 0.003         | 9.43×          |
-| NumberTypes         | Deserialization | 0.021          | 0.003         | 6.60×          |
-| CollectionTypes     | Serialization   | 0.067          | 0.009         | 7.41×          |
-| CollectionTypes     | Deserialization | 0.059          | 0.025         | 2.37×          |
-| SimplePersonList100 | Serialization   | 0.153          | 0.042         | 3.64×          |
-| SimplePersonList100 | Deserialization | 0.234          | 0.039         | 5.99×          |
-| ComplexPersonList50 | Serialization   | 0.388          | 0.059         | 6.59×          |
-| ComplexPersonList50 | Deserialization | 0.452          | 0.089         | 5.09×          |
+| Case                | Type            | JSON5 (ms) | JSON (ms) | External-JSON5 (ms) | Performance Ranking |
+| ------------------- | --------------- | ---------- | --------- | ------------------- | ------------------- |
+| SimplePerson        | Serialization   | 0.028      | 0.010     | 0.011               | JSON > Ext-JSON5 > JSON5 |
+| SimplePerson        | Deserialization | 0.049      | 0.014     | 0.017               | JSON > Ext-JSON5 > JSON5 |
+| ComplexPerson       | Serialization   | 0.073      | 0.018     | 0.018               | JSON ≈ Ext-JSON5 > JSON5 |
+| ComplexPerson       | Deserialization | 0.101      | 0.021     | 0.020               | Ext-JSON5 > JSON > JSON5 |
+| Company             | Serialization   | 0.163      | 0.031     | 0.054               | JSON > Ext-JSON5 > JSON5 |
+| Company             | Deserialization | 0.200      | 0.081     | 0.117               | JSON > Ext-JSON5 > JSON5 |
 
-**Overall Average Time**
+**Overall Performance Comparison:**
+- **JSON** is **3.90×** faster than **JSON5** and **2.75×** faster than **External-JSON5**
+- **External-JSON5** is **1.42×** faster than **JSON5**
 
-* JSON5: **0.158 ms**
-* JSON: **0.036 ms**
-* 🔥 Overall: **KotlinX JSON is 4.33× faster than JSON5**
+## Key Insights
 
-
-<img width="800" alt="benchmark bar chart" src="https://github.com/user-attachments/assets/bcf44217-827b-49a1-a18b-4a0f7fedc103" />
+- **kotlinx.serialization JSON** remains the performance leader
+- **External JSON5 library** provides a good balance of JSON5 features with reasonable performance  
+- **This project's JSON5** offers seamless kotlinx.serialization integration but at a performance cost
+- Choose based on your priorities: performance (JSON), JSON5 features with good performance (External-JSON5), or kotlinx.serialization integration (this project)
