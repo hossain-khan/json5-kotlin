@@ -5,8 +5,8 @@ This is a Kotlin based repository with a JSON5 library for parsing and serializi
 ## Code Standards
 
 ### Development Flow
-- Build: `gradle build`
-- Test: `gradle check`
+- Build: `./gradlew build`
+- Test: `./gradlew check`
 
 ## Repository Structure
 - `lib` - Gradle module containing the core JSON5 library code with unit tests
