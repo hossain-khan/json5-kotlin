@@ -53,6 +53,15 @@ object JSON5 {
      * @param serializer The serializer for type [T]
      * @param value The value to encode
      * @return JSON5 string representation
+     *
+     * ```kotlin
+     * @Serializable
+     * data class Config(val name: String, val version: Int)
+     * 
+     * val config = Config("MyApp", 1)
+     * val json5 = JSON5.encodeToString(Config.serializer(), config)
+     * // Result: {name:'MyApp',version:1}
+     * ```
      */
     fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String {
         return format.encodeToString(serializer, value)
@@ -64,6 +73,21 @@ object JSON5 {
      * @param deserializer The deserializer for type [T]
      * @param string JSON5 string to decode
      * @return Decoded value of type [T]
+     *
+     * ```kotlin
+     * @Serializable
+     * data class Config(val name: String, val version: Int)
+     * 
+     * val json5 = """
+     *     {
+     *         // Application name
+     *         name: 'MyApp',
+     *         version: 1, // current version
+     *     }
+     * """.trimIndent()
+     * val config = JSON5.decodeFromString(Config.serializer(), json5)
+     * // Result: Config(name="MyApp", version=1)
+     * ```
      */
     fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
         return format.decodeFromString(deserializer, string)
