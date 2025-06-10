@@ -12,6 +12,25 @@ import org.junit.jupiter.api.DisplayName
  */
 @DisplayName("JSON5.parse with JSON5Value")
 class JSON5ValueTest {
+    /**
+     * Helper function to convert JSON5Value back to raw Kotlin objects for testing compatibility.
+     */
+    private fun JSON5Value.toAny(): Any? {
+        return when (this) {
+            is JSON5Value.Null -> null
+            is JSON5Value.Boolean -> this.value
+            is JSON5Value.String -> this.value
+            is JSON5Value.Number.Integer -> this.value.toDouble() // Convert to Double for consistency with parseToAny
+            is JSON5Value.Number.Decimal -> this.value
+            is JSON5Value.Number.Hexadecimal -> this.value.toDouble() // Convert to Double for consistency
+            is JSON5Value.Number.PositiveInfinity -> Double.POSITIVE_INFINITY
+            is JSON5Value.Number.NegativeInfinity -> Double.NEGATIVE_INFINITY
+            is JSON5Value.Number.NaN -> Double.NaN
+            is JSON5Value.Object -> this.value.mapValues { it.value.toAny() }
+            is JSON5Value.Array -> this.value.map { it.toAny() }
+        }
+    }
+
 
     @Test
     fun `should parse empty object to JSON5Value`() {
@@ -84,8 +103,8 @@ class JSON5ValueTest {
     }
 
     @Test
-    fun `should parse using parseToAny method`() {
-        val result = JSON5.parseToAny("""{"key": "value"}""")
+    fun `should convert JSON5Value to raw objects using toAny helper`() {
+        val result = JSON5.parse("""{"key": "value"}""").toAny()
         result.shouldBeInstanceOf<Map<String, Any?>>()
         val map = result as Map<String, Any?>
         map["key"] shouldBe "value"
