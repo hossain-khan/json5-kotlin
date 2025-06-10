@@ -14,25 +14,50 @@ object JSON5 {
     private val format = DefaultJSON5Format
 
     /**
-     * Parses a JSON5 string into a Kotlin object.
+     * Parses a JSON5 string into a strongly-typed JSON5Value.
+     *
+     * @param text JSON5 text to parse
+     * @return The parsed value as a JSON5Value
+     * @throws JSON5Exception if the input is invalid JSON5
+     */
+    fun parse(text: String): JSON5Value {
+        val result = JSON5Parser.parse(text)
+        return JSON5Value.from(result)
+    }
+
+    /**
+     * Parses a JSON5 string into a raw Kotlin object without type conversion.
      *
      * @param text JSON5 text to parse
      * @return The parsed value (Map, List, String, Number, Boolean, or null)
      * @throws JSON5Exception if the input is invalid JSON5
      */
-    fun parse(text: String): Any? {
+    fun parseToAny(text: String): Any? {
         return JSON5Parser.parse(text)
     }
 
     /**
-     * Parses a JSON5 string into a Kotlin object, with a reviver function.
+     * Parses a JSON5 string into a strongly-typed JSON5Value, with a reviver function.
+     *
+     * @param text JSON5 text to parse
+     * @param reviver A function that transforms the parsed values
+     * @return The parsed value as a JSON5Value
+     * @throws JSON5Exception if the input is invalid JSON5
+     */
+    fun parse(text: String, reviver: (key: String, value: Any?) -> Any?): JSON5Value {
+        val result = JSON5Parser.parse(text, reviver)
+        return JSON5Value.from(result)
+    }
+
+    /**
+     * Parses a JSON5 string into a raw Kotlin object without type conversion, with a reviver function.
      *
      * @param text JSON5 text to parse
      * @param reviver A function that transforms the parsed values
      * @return The parsed value (Map, List, String, Number, Boolean, or null)
      * @throws JSON5Exception if the input is invalid JSON5
      */
-    fun parse(text: String, reviver: (key: String, value: Any?) -> Any?): Any? {
+    fun parseToAny(text: String, reviver: (key: String, value: Any?) -> Any?): Any? {
         return JSON5Parser.parse(text, reviver)
     }
 
