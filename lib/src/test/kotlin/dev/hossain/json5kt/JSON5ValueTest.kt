@@ -116,4 +116,36 @@ class JSON5ValueTest {
             JSON5Value.from(Thread())
         }
     }
+
+    @Test
+    fun `should handle integer types correctly`() {
+        // Test with various integer types
+        val intResult = JSON5Value.from(42)
+        intResult.shouldBeInstanceOf<JSON5Value.Number.Integer>()
+        (intResult as JSON5Value.Number.Integer).value shouldBe 42L
+
+        val longResult = JSON5Value.from(42L)
+        longResult.shouldBeInstanceOf<JSON5Value.Number.Integer>()
+        (longResult as JSON5Value.Number.Integer).value shouldBe 42L
+    }
+
+    @Test
+    fun `should handle array conversion correctly`() {
+        val kotlinList = listOf("hello", 42.0, true, null)
+        val result = JSON5Value.from(kotlinList)
+        result.shouldBeInstanceOf<JSON5Value.Array>()
+        val arr = result as JSON5Value.Array
+        
+        arr.value.size shouldBe 4
+        arr.value[0].shouldBeInstanceOf<JSON5Value.String>()
+        (arr.value[0] as JSON5Value.String).value shouldBe "hello"
+        
+        arr.value[1].shouldBeInstanceOf<JSON5Value.Number.Decimal>()
+        (arr.value[1] as JSON5Value.Number.Decimal).value shouldBe 42.0
+        
+        arr.value[2].shouldBeInstanceOf<JSON5Value.Boolean>()
+        (arr.value[2] as JSON5Value.Boolean).value shouldBe true
+        
+        arr.value[3] shouldBe JSON5Value.Null
+    }
 }
