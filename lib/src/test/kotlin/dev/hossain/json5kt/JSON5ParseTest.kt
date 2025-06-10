@@ -351,8 +351,9 @@ class JSON5ParseTest {
         // - Correctly parsed standard escapes (\b, \f, \n, \r, \t, \v, \0, \xHH, \uHHHH)
         // - Incorrectly handled line continuations (e.g., \\\n becomes \ + newline, \\\u2028 becomes char U+2028)
         // - Incorrectly handled \a (becomes BEL \u0007, instead of literal 'a' per JSON5 spec)
+        // Explicit \uXXXX for all initial escapes
         JSON5.parse("""'\\b\\f\\n\\r\\t\\v\\0\\x0f\\u01fF\\\n\\\r\n\\\r\\\u2028\\\u2029\\a\\\'\\\"'""").toAny() shouldBe
-            "\u0008\u000C\u000A\u000D\u0009\u000B\u0000\u000F\u01FF\\\n\\\r\n\\\r\u2028\u2029\u0007'\"" // Explicit \uXXXX for all initial escapes
+            "\u0008\u000C\u000A\u000D\u0009\u000B\u0000\u000F\u01FF\\\n\\\r\n\\\r\u2028\u2029\u0007'\""
     }
 
     /**

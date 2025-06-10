@@ -1,11 +1,11 @@
 package dev.hossain.json5kt.benchmark
 
-import at.syntaxerror.json5.*
+import at.syntaxerror.json5.JSONArray
+import at.syntaxerror.json5.JSONObject
+import at.syntaxerror.json5.JSONParser
+import at.syntaxerror.json5.JSONStringify
 import dev.hossain.json5kt.JSON5
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import kotlin.system.measureNanoTime
 
 /**

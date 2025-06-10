@@ -1,6 +1,6 @@
 package dev.hossain.json5kt
 
-/**
+/*
  * Test utilities for JSON5 parsing.
  * Contains helper functions for testing compatibility between the new type-safe API
  * and the legacy parseToAny behavior.

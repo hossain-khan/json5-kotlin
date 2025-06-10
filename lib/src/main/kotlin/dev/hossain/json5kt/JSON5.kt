@@ -1,6 +1,7 @@
 package dev.hossain.json5kt
 
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 
 /**
  * JSON5 Implementation for Kotlin
