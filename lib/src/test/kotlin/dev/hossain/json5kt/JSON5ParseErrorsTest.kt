@@ -14,13 +14,15 @@ import org.junit.jupiter.api.Test
 @DisplayName("JSON5.parse errors")
 class JSON5ParseErrorsTest {
 
+
+
     /**
      * Tests that parsing an empty document throws an error.
      */
     @Test
     fun `should throw on empty documents`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("")
+            JSON5.parse("").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -34,7 +36,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on documents with only comments`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("//a")
+            JSON5.parse("//a").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -47,7 +49,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on incomplete single line comments`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("/a")
+            JSON5.parse("/a").toAny()
         }
         exception.message shouldContain "invalid character '/'"
         exception.lineNumber shouldBe 1
@@ -60,7 +62,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unterminated multiline comments`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("/*")
+            JSON5.parse("/*").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -73,7 +75,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unterminated multiline comment closings`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("/**")
+            JSON5.parse("/**").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -86,7 +88,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters in values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("a")
+            JSON5.parse("a").toAny()
         }
         exception.message shouldContain "Unexpected identifier: a" // Adjusted message
         exception.lineNumber shouldBe 1
@@ -100,7 +102,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters in identifier start escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{\\a:1}")
+            JSON5.parse("{\\a:1}").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -114,7 +116,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid identifier start characters`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{\\u0021:1}")
+            JSON5.parse("{\\u0021:1}").toAny()
         }
         exception.message shouldContain "invalid identifier character"
         exception.lineNumber shouldBe 1
@@ -127,7 +129,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters in identifier continue escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a\\a:1}")
+            JSON5.parse("{a\\a:1}").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -141,7 +143,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid identifier continue characters`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a\\u0021:1}")
+            JSON5.parse("{a\\u0021:1}").toAny()
         }
         exception.message shouldContain "invalid identifier character"
         exception.lineNumber shouldBe 1
@@ -154,7 +156,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following a sign`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("-a")
+            JSON5.parse("-a").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -167,7 +169,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following a leading decimal point`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny(".a")
+            JSON5.parse(".a").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -180,7 +182,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following an exponent indicator`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("1ea")
+            JSON5.parse("1ea").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -193,7 +195,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following an exponent sign`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("1e-a")
+            JSON5.parse("1e-a").toAny()
         }
         exception.message shouldContain "invalid character 'a'"
         exception.lineNumber shouldBe 1
@@ -206,7 +208,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following a hexadecimal indicator`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("0xg")
+            JSON5.parse("0xg").toAny()
         }
         exception.message shouldContain "invalid character 'g'"
         exception.lineNumber shouldBe 1
@@ -219,7 +221,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid new lines in strings`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"\n\"")
+            JSON5.parse("\"\n\"").toAny()
         }
         exception.message shouldContain "invalid character '\\x0a'" // Match actual message
         exception.lineNumber shouldBe 2
@@ -232,7 +234,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unterminated strings`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"")
+            JSON5.parse("\"").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -245,7 +247,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid identifier start characters in property names`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{!:1}")
+            JSON5.parse("{!:1}").toAny()
         }
         exception.message shouldContain "invalid character '!'"
         exception.lineNumber shouldBe 1
@@ -258,7 +260,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following a property name`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a!1}")
+            JSON5.parse("{a!1}").toAny()
         }
         exception.message shouldContain "invalid character '!'"
         exception.lineNumber shouldBe 1
@@ -271,7 +273,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following a property value`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a:1!}")
+            JSON5.parse("{a:1!}").toAny()
         }
         exception.message shouldContain "invalid character '!'"
         exception.lineNumber shouldBe 1
@@ -284,7 +286,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters following an array value`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("[1!]")
+            JSON5.parse("[1!]").toAny()
         }
         exception.message shouldContain "invalid character '!'"
         exception.lineNumber shouldBe 1
@@ -297,7 +299,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid characters in literals`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("tru!")
+            JSON5.parse("tru!").toAny()
         }
         exception.message shouldContain "invalid character '!'"
         exception.lineNumber shouldBe 1
@@ -310,7 +312,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unterminated escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"\\")
+            JSON5.parse("\"\\").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -323,7 +325,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid first digits in hexadecimal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"\\xg\"")
+            JSON5.parse("\"\\xg\"").toAny()
         }
         exception.message shouldContain "invalid character 'g'"
         exception.lineNumber shouldBe 1
@@ -336,7 +338,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid second digits in hexadecimal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"\\x0g\"")
+            JSON5.parse("\"\\x0g\"").toAny()
         }
         exception.message shouldContain "invalid character 'g'"
         exception.lineNumber shouldBe 1
@@ -349,7 +351,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on invalid unicode escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\"\\u000g\"")
+            JSON5.parse("\"\\u000g\"").toAny()
         }
         exception.message shouldContain "invalid character 'g'"
         exception.lineNumber shouldBe 1
@@ -369,7 +371,7 @@ class JSON5ParseErrorsTest {
     fun `should throw on escaped digits`() {
         for (i in 1..9) {
             val exception = shouldThrow<JSON5Exception> {
-                JSON5.parseToAny("'\\$i'")
+                JSON5.parse("'\\$i'").toAny()
             }
             exception.message shouldContain "invalid character '$i'"
             exception.lineNumber shouldBe 1
@@ -384,7 +386,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on octal escapes`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("'\\01'")
+            JSON5.parse("'\\01'").toAny()
         }
         exception.message shouldContain "invalid character '1'"
         exception.lineNumber shouldBe 1
@@ -397,7 +399,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on multiple values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("1 2")
+            JSON5.parse("1 2").toAny()
         }
         exception.message shouldContain "invalid character '2'"
         exception.lineNumber shouldBe 1
@@ -410,7 +412,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw with control characters escaped in the message`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("\u0001")
+            JSON5.parse("\u0001").toAny()
         }
         exception.message shouldContain "invalid character '\\x01'"
         exception.lineNumber shouldBe 1
@@ -423,7 +425,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed objects before property names`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{")
+            JSON5.parse("{").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -436,7 +438,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed objects after property names`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a")
+            JSON5.parse("{a").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -449,7 +451,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed objects before property values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a:")
+            JSON5.parse("{a:").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -462,7 +464,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed objects after property values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("{a:1")
+            JSON5.parse("{a:1").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -475,7 +477,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed arrays before values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("[")
+            JSON5.parse("[").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -488,7 +490,7 @@ class JSON5ParseErrorsTest {
     @Test
     fun `should throw on unclosed arrays after values`() {
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny("[1")
+            JSON5.parse("[1").toAny()
         }
         exception.message shouldContain "invalid end of input"
         exception.lineNumber shouldBe 1
@@ -502,17 +504,17 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("Object: should throw for invalid keys")
     fun `object invalid keys`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{null: 1}") }
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{null: 1}").toAny() }
         ex1.message shouldContain "Expected property name or '}'" // Lexer sees 'n', expects identifier or string key
         ex1.lineNumber shouldBe 1
         ex1.columnNumber shouldBe 2 // 'n'
 
-        val ex2 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{true: 1}") }
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{true: 1}").toAny() }
         ex2.message shouldContain "Expected property name or '}'"
         ex2.lineNumber shouldBe 1
         ex2.columnNumber shouldBe 2 // 't'
 
-        val ex3 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{123: 1}") }
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("{123: 1}").toAny() }
         ex3.message shouldContain "Expected property name or '}'"
         ex3.lineNumber shouldBe 1
         ex3.columnNumber shouldBe 2 // '1'
@@ -524,12 +526,12 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("Object: should throw for comma issues")
     fun `object comma issues`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{a:1,,}") }
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1,,}").toAny() }
         ex1.message shouldContain "Expected property name or '}'" // Expects a key after comma
         ex1.lineNumber shouldBe 1
         ex1.columnNumber shouldBe 6
 
-        val ex2 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{,a:1}") }
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{,a:1}").toAny() }
         ex2.message shouldContain "Expected property name or '}'" // Cannot start with comma
         ex2.lineNumber shouldBe 1
         ex2.columnNumber shouldBe 2
@@ -542,22 +544,22 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("Object: should throw for structure issues")
     fun `object structure issues`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{a:1 b:2}") } // Missing comma
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1 b:2}").toAny() } // Missing comma
         ex1.message shouldContain "Expected ',' or '}'" // Expects comma or }
         ex1.lineNumber shouldBe 1
         ex1.columnNumber shouldBe 6
 
-        val ex2 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{\"a\":1 \"b\":2}") } // Missing comma, string keys
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("{\"a\":1 \"b\":2}").toAny() } // Missing comma, string keys
         ex2.message shouldContain "Expected ',' or '}'" // Expects comma or }
         ex2.lineNumber shouldBe 1
         ex2.columnNumber shouldBe 8
 
-        val ex3 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{a:}") } // Missing value
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("{a:}").toAny() } // Missing value
         ex3.message shouldContain "Unexpected punctuator" // Expects a value
         ex3.lineNumber shouldBe 1
         ex3.columnNumber shouldBe 4
 
-        val ex4 = shouldThrow<JSON5Exception> { JSON5.parseToAny("{a:1, :2}") } // Missing key
+        val ex4 = shouldThrow<JSON5Exception> { JSON5.parse("{a:1, :2}").toAny() } // Missing key
         ex4.message shouldContain "Expected property name or '}'" // Expects a key
         ex4.lineNumber shouldBe 1
         ex4.columnNumber shouldBe 7
@@ -570,17 +572,17 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("Array: should throw for comma issues")
     fun `array comma issues`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("[1,2,,]") }
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("[1,2,,]").toAny() }
         ex1.message shouldContain "Unexpected punctuator" // Expects a value after comma
         ex1.lineNumber shouldBe 1
         ex1.columnNumber shouldBe 6
 
-        val ex2 = shouldThrow<JSON5Exception> { JSON5.parseToAny("[,1,2]") }
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("[,1,2]").toAny() }
         ex2.message shouldContain "Unexpected punctuator" // Cannot start with comma
         ex2.lineNumber shouldBe 1
         ex2.columnNumber shouldBe 2
 
-        val ex3 = shouldThrow<JSON5Exception> { JSON5.parseToAny("[1,,2]") } // Elision not allowed by spec
+        val ex3 = shouldThrow<JSON5Exception> { JSON5.parse("[1,,2]").toAny() } // Elision not allowed by spec
         ex3.message shouldContain "Unexpected punctuator" // Expects value, finds comma
         ex3.lineNumber shouldBe 1
         ex3.columnNumber shouldBe 4
@@ -592,7 +594,7 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("Array: should throw for structure issues")
     fun `array structure issues`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("[1 2]") } // Missing comma
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("[1 2]").toAny() } // Missing comma
         ex1.message shouldContain "Expected ',' or ']'" // Expects comma or ]
         ex1.lineNumber shouldBe 1
         ex1.columnNumber shouldBe 4
@@ -604,13 +606,13 @@ class JSON5ParseErrorsTest {
     @Test
     @DisplayName("String: should throw for unterminated strings")
     fun `string unterminated`() {
-        val ex1 = shouldThrow<JSON5Exception> { JSON5.parseToAny("\"abc") }
+        val ex1 = shouldThrow<JSON5Exception> { JSON5.parse("\"abc").toAny() }
         ex1.message shouldContain "invalid end of input"
         ex1.lineNumber shouldBe 1 // The line where the string started
         // Column could be end of line or where EOF is effectively seen
         // ex1.columnNumber shouldBe 4
 
-        val ex2 = shouldThrow<JSON5Exception> { JSON5.parseToAny("'abc") }
+        val ex2 = shouldThrow<JSON5Exception> { JSON5.parse("'abc").toAny() }
         ex2.message shouldContain "invalid end of input"
         ex2.lineNumber shouldBe 1
         // ex2.columnNumber shouldBe 4
@@ -624,7 +626,7 @@ class JSON5ParseErrorsTest {
     fun `string invalid unescaped newline`() {
         val jsonStringWithUnescapedLF = "'abc\ndef'" // Kotlin makes this a literal LF
         val exception = shouldThrow<JSON5Exception> {
-            JSON5.parseToAny(jsonStringWithUnescapedLF)
+            JSON5.parse(jsonStringWithUnescapedLF).toAny()
         }
         exception.message shouldContain "invalid character '\\x0a'" // LF
         exception.lineNumber shouldBe 2 // Error is on the first line where string starts

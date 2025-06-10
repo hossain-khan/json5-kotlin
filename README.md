@@ -62,7 +62,7 @@ You can generate a personal access token at [GitHub > Settings > Developer setti
 ```kotlin
 import dev.hossain.json5kt.JSON5
 
-// Parse JSON5 to Kotlin objects
+// Parse JSON5 to strongly-typed JSON5Value objects
 val json5 = """
 {
     // Configuration for my app
@@ -73,7 +73,20 @@ val json5 = """
 """
 
 val parsed = JSON5.parse(json5)
-// Returns: Map<String, Any?>
+// Returns: JSON5Value.Object
+
+// Access values in a type-safe way
+when (parsed) {
+    is JSON5Value.Object -> {
+        val name = parsed.value["name"] as? JSON5Value.String
+        val version = parsed.value["version"] as? JSON5Value.Number.Integer
+        val features = parsed.value["features"] as? JSON5Value.Array
+        
+        println("App name: ${name?.value}") // "MyApp"
+        println("Version: ${version?.value}") // 2
+        println("Features: ${features?.value?.map { (it as JSON5Value.String).value }}") // ["auth", "analytics"]
+    }
+}
 
 // Stringify Kotlin objects to JSON5
 val data = mapOf(
@@ -83,6 +96,47 @@ val data = mapOf(
 )
 val json5String = JSON5.stringify(data)
 // Returns: {name:'MyApp',version:2,enabled:true}
+```
+
+### Migration from parseToAny (Deprecated)
+
+If you were previously using the deprecated `parseToAny` method, here's how to migrate:
+
+```kotlin
+// Old API (deprecated and removed)
+// val result = JSON5.parseToAny("""{"key": "value"}""")
+// val map = result as Map<String, Any?>
+
+// New API - Type-safe approach (recommended)
+val result = JSON5.parse("""{"key": "value"}""")
+when (result) {
+    is JSON5Value.Object -> {
+        val key = result.value["key"] as? JSON5Value.String
+        println(key?.value) // "value"
+    }
+}
+
+// Alternative: Convert to raw objects when needed
+fun JSON5Value.toRawObject(): Any? {
+    return when (this) {
+        is JSON5Value.Null -> null
+        is JSON5Value.Boolean -> this.value
+        is JSON5Value.String -> this.value
+        is JSON5Value.Number.Integer -> this.value.toDouble()
+        is JSON5Value.Number.Decimal -> this.value
+        is JSON5Value.Number.Hexadecimal -> this.value.toDouble()
+        is JSON5Value.Number.PositiveInfinity -> Double.POSITIVE_INFINITY
+        is JSON5Value.Number.NegativeInfinity -> Double.NEGATIVE_INFINITY
+        is JSON5Value.Number.NaN -> Double.NaN
+        is JSON5Value.Object -> this.value.mapValues { it.value.toRawObject() }
+        is JSON5Value.Array -> this.value.map { it.toRawObject() }
+    }
+}
+
+// Using the helper for compatibility
+val rawResult = JSON5.parse("""{"key": "value"}""").toRawObject()
+val map = rawResult as Map<String, Any?>
+println(map["key"]) // "value"
 ```
 
 ### Integration with kotlinx.serialization
@@ -148,6 +202,19 @@ val numbers = JSON5.parse("""
 }
 """)
 
+// Access different number types
+when (numbers) {
+    is JSON5Value.Object -> {
+        val hex = numbers.value["hex"] as? JSON5Value.Number.Hexadecimal
+        val infinity = numbers.value["infinity"] as? JSON5Value.Number.PositiveInfinity
+        val nan = numbers.value["notANumber"] as? JSON5Value.Number.NaN
+        
+        println("Hex value: ${hex?.value}") // 912559
+        println("Is infinity: ${infinity != null}") // true
+        println("Is NaN: ${nan != null}") // true
+    }
+}
+
 // Multi-line strings and comments
 val complex = JSON5.parse("""
 {
@@ -159,6 +226,17 @@ multi-line string",
     unquoted: 'keys work too'
 }
 """)
+
+// Working with the parsed result
+when (complex) {
+    is JSON5Value.Object -> {
+        val multiLine = complex.value["multiLine"] as? JSON5Value.String
+        val singleQuoted = complex.value["singleQuoted"] as? JSON5Value.String
+        
+        println("Multi-line: ${multiLine?.value}")
+        println("Single quoted: ${singleQuoted?.value}")
+    }
+}
 ```
 
 ## Building the Project

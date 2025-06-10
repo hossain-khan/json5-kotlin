@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName
 @DisplayName("JSON5.parse with JSON5Value")
 class JSON5ValueTest {
 
+
+
     @Test
     fun `should parse empty object to JSON5Value`() {
         val result = JSON5.parse("{}")
@@ -84,8 +86,8 @@ class JSON5ValueTest {
     }
 
     @Test
-    fun `should parse using parseToAny method`() {
-        val result = JSON5.parseToAny("""{"key": "value"}""")
+    fun `should convert JSON5Value to raw objects using toAny helper`() {
+        val result = JSON5.parse("""{"key": "value"}""").toAny()
         result.shouldBeInstanceOf<Map<String, Any?>>()
         val map = result as Map<String, Any?>
         map["key"] shouldBe "value"
