@@ -1,0 +1,18 @@
+// Example Employee data in JSON5 format
+{
+  id: 101,
+  name: 'Jane Doe',
+  position: 'Software Engineer',
+  address: {
+    street: '123 Main St',
+    city: 'Springfield',
+    state: 'IL',
+    zip: '62704',
+  },
+  contact: {
+    email: 'jane.doe@example.com',
+    phone: '+1-555-1234',
+  },
+  isActive: true, // Optional, defaults to true
+}
+
