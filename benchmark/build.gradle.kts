@@ -13,11 +13,11 @@ dependencies {
     implementation(libs.bundles.kotlinxEcosystem)
     
     // External JSON5 library for comparison
-    implementation("at.syntaxerror:json5:2.1.0")
+    implementation(libs.syntaxerrorJson5)
 
     // Test dependencies
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation(libs.junit)
 }
 
 application {
