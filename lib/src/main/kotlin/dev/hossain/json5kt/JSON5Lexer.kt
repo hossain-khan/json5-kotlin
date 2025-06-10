@@ -6,7 +6,9 @@ import kotlin.math.pow
  * Lexer for JSON5 syntax
  * Breaks JSON5 text into tokens for the parser
  */
-class JSON5Lexer(private val source: String) {
+class JSON5Lexer(
+    private val source: String,
+) {
     private var pos: Int = 0
     private var line: Int = 1
     private var column: Int = 1 // Starting column at 1 to match JavaScript implementation
@@ -247,13 +249,19 @@ class JSON5Lexer(private val source: String) {
         }
     }
 
-    private fun isWhitespace(c: Char): Boolean {
-        return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
-               c == '\u00A0' || c == '\u2028' || c == '\u2029' ||
-               c == '\u000B' || c == '\u000C' || c == '\uFEFF' ||
-               // Include other Unicode space separators
-               c.category == CharCategory.SPACE_SEPARATOR
-    }
+    private fun isWhitespace(c: Char): Boolean =
+        c == ' ' ||
+            c == '\t' ||
+            c == '\n' ||
+            c == '\r' ||
+            c == '\u00A0' ||
+            c == '\u2028' ||
+            c == '\u2029' ||
+            c == '\u000B' ||
+            c == '\u000C' ||
+            c == '\uFEFF' ||
+            // Include other Unicode space separators
+            c.category == CharCategory.SPACE_SEPARATOR
 
     private fun skipComments() {
         if (currentChar == '/' && peek() == '/') {
@@ -634,11 +642,12 @@ class JSON5Lexer(private val source: String) {
             try {
                 // Parse the hex number manually instead of using toDouble()
                 val hexStr = buffer.toString()
-                val value = if (isNegative) {
-                    -parseHexToDouble(hexStr.substring(3)) // skip "-0x"
-                } else {
-                    parseHexToDouble(hexStr.substring(2)) // skip "0x"
-                }
+                val value =
+                    if (isNegative) {
+                        -parseHexToDouble(hexStr.substring(3)) // skip "-0x"
+                    } else {
+                        parseHexToDouble(hexStr.substring(2)) // skip "0x"
+                    }
                 return Token.NumericToken(value, startLine, startColumn)
             } catch (e: NumberFormatException) {
                 throw JSON5Exception("Invalid hexadecimal number", line, column)
@@ -808,7 +817,7 @@ class JSON5Lexer(private val source: String) {
                     // This looks like a malformed "null" literal
                     throw JSON5Exception.invalidChar(currentChar!!, line, column)
                 }
-                break;
+                break
             }
         }
 
@@ -839,7 +848,5 @@ class JSON5Lexer(private val source: String) {
         return hexString.toString().toInt(16).toChar()
     }
 
-    private fun Char.isHexDigit(): Boolean {
-        return this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
-    }
+    private fun Char.isHexDigit(): Boolean = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
 }

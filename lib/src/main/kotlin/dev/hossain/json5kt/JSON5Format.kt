@@ -1,36 +1,45 @@
 package dev.hossain.json5kt
 
-import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
-import kotlinx.serialization.json.*
-import kotlinx.serialization.modules.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.StringFormat
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.modules.EmptySerializersModule
+import kotlinx.serialization.modules.SerializersModule
 
 /**
  * JSON5 serialization format for kotlinx.serialization.
- * 
+ *
  * This format allows encoding and decoding of @Serializable classes to/from JSON5 format.
  * It builds on top of the existing JSON5Parser and JSON5Serializer implementations.
- * 
+ *
  * **Performance Optimizations:**
  * - Uses cached Json instances to avoid recreation overhead
  * - Optimized conversion methods with reduced object allocations
  * - Efficient numeric type handling with fast paths
  * - Pre-sized collections for better memory allocation patterns
- * 
+ *
  * @since 1.1.0 Performance improvements reduced JSON vs JSON5 gap from ~5x to ~3.5x
  */
 @OptIn(ExperimentalSerializationApi::class)
 class JSON5Format(
-    private val configuration: JSON5Configuration = JSON5Configuration.Default
+    private val configuration: JSON5Configuration = JSON5Configuration.Default,
 ) : StringFormat {
-    
     override val serializersModule: SerializersModule = EmptySerializersModule()
 
     /**
      * Encodes the given [value] to JSON5 string using the serializer retrieved from reified type parameter.
      */
-    override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String {
+    override fun <T> encodeToString(
+        serializer: SerializationStrategy<T>,
+        value: T,
+    ): String {
         val jsonElement = JSON5Encoder(configuration).encodeToJsonElement(serializer, value)
         return jsonElementToJson5String(jsonElement)
     }
@@ -38,7 +47,10 @@ class JSON5Format(
     /**
      * Decodes the given JSON5 [string] to a value of type [T] using the given [deserializer].
      */
-    override fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
+    override fun <T> decodeFromString(
+        deserializer: DeserializationStrategy<T>,
+        string: String,
+    ): T {
         val jsonElement = json5StringToJsonElement(string)
         return JSON5Decoder(configuration, jsonElement).decodeSerializableValue(deserializer)
     }
@@ -59,8 +71,8 @@ class JSON5Format(
      * Optimized conversion from JsonElement to Kotlin object.
      * Reduces string allocations and improves numeric type handling.
      */
-    private fun jsonElementToKotlinObject(element: JsonElement): Any? {
-        return when (element) {
+    private fun jsonElementToKotlinObject(element: JsonElement): Any? =
+        when (element) {
             is JsonNull -> null
             is JsonPrimitive -> {
                 if (element.isString) {
@@ -114,14 +126,13 @@ class JSON5Format(
                 result
             }
         }
-    }
 
     /**
      * Optimized conversion from Kotlin object to JsonElement.
      * Reduces object allocations and improves numeric type handling.
      */
-    private fun kotlinObjectToJsonElement(obj: Any?): JsonElement {
-        return when (obj) {
+    private fun kotlinObjectToJsonElement(obj: Any?): JsonElement =
+        when (obj) {
             null -> JsonNull
             is Boolean -> JsonPrimitive(obj)
             is Int -> JsonPrimitive(obj)
@@ -155,6 +166,7 @@ class JSON5Format(
             is Map<*, *> -> {
                 // Use mutable map for better performance and pre-size it
                 val jsonObject = mutableMapOf<String, JsonElement>()
+
                 @Suppress("UNCHECKED_CAST")
                 val map = obj as Map<String, Any?>
                 for ((key, value) in map) {
@@ -172,7 +184,6 @@ class JSON5Format(
             }
             else -> JsonPrimitive(obj.toString())
         }
-    }
 }
 
 /**
@@ -180,7 +191,7 @@ class JSON5Format(
  */
 data class JSON5Configuration(
     val prettyPrint: Boolean = false,
-    val prettyPrintIndent: String = "  "
+    val prettyPrintIndent: String = "  ",
 ) {
     companion object {
         val Default = JSON5Configuration()
@@ -195,30 +206,35 @@ private object JsonInstances {
     /**
      * Optimized Json instance for encoding with minimal configuration.
      */
-    val encoder = Json { 
-        encodeDefaults = true
-        isLenient = true
-        allowSpecialFloatingPointValues = true
-    }
-    
+    val encoder =
+        Json {
+            encodeDefaults = true
+            isLenient = true
+            allowSpecialFloatingPointValues = true
+        }
+
     /**
      * Optimized Json instance for decoding with minimal configuration.
      */
-    val decoder = Json { 
-        ignoreUnknownKeys = true
-        isLenient = true
-        allowSpecialFloatingPointValues = true
-    }
+    val decoder =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            allowSpecialFloatingPointValues = true
+        }
 }
 
 /**
  * Encoder implementation that uses kotlinx.serialization's JSON encoder as a bridge.
  * Uses cached Json instance for better performance.
  */
-private class JSON5Encoder(private val configuration: JSON5Configuration) {
-    fun <T> encodeToJsonElement(serializer: SerializationStrategy<T>, value: T): JsonElement {
-        return JsonInstances.encoder.encodeToJsonElement(serializer, value)
-    }
+private class JSON5Encoder(
+    private val configuration: JSON5Configuration,
+) {
+    fun <T> encodeToJsonElement(
+        serializer: SerializationStrategy<T>,
+        value: T,
+    ): JsonElement = JsonInstances.encoder.encodeToJsonElement(serializer, value)
 }
 
 /**
@@ -227,11 +243,10 @@ private class JSON5Encoder(private val configuration: JSON5Configuration) {
  */
 private class JSON5Decoder(
     private val configuration: JSON5Configuration,
-    private val element: JsonElement
+    private val element: JsonElement,
 ) {
-    fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
-        return JsonInstances.decoder.decodeFromJsonElement(deserializer, element)
-    }
+    fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T =
+        JsonInstances.decoder.decodeFromJsonElement(deserializer, element)
 }
 
 /**
@@ -245,12 +260,11 @@ val DefaultJSON5Format = JSON5Format()
  */
 private object JSON5FormatCache {
     private val formatCache = mutableMapOf<JSON5Configuration, JSON5Format>()
-    
-    fun getFormat(configuration: JSON5Configuration): JSON5Format {
-        return if (configuration == JSON5Configuration.Default) {
+
+    fun getFormat(configuration: JSON5Configuration): JSON5Format =
+        if (configuration == JSON5Configuration.Default) {
             DefaultJSON5Format
         } else {
             formatCache.getOrPut(configuration) { JSON5Format(configuration) }
         }
-    }
 }

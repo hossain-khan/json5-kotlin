@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 fun main() {
     // Test serialization and deserialization of Employee model
     testEmployeeSerialization()
-    
+
     // Run README sample code validation tests
     println("\n=== README Sample Code Validation ===")
     testBasicParsingAndStringifying()
@@ -23,13 +23,14 @@ fun main() {
 }
 
 private fun testSampleJson5Files() {
-    val json5files = listOf(
-        "simple-object.json5",
-        "array-example.json5",
-        "numeric-formats.json5",
-        "string-and-identifiers.json5",
-        "root-string.json5"
-    )
+    val json5files =
+        listOf(
+            "simple-object.json5",
+            "array-example.json5",
+            "numeric-formats.json5",
+            "string-and-identifiers.json5",
+            "root-string.json5",
+        )
 
     json5files.forEach { fileName ->
         println("\n=== Processing file: $fileName ===")
@@ -52,7 +53,6 @@ private fun testSampleJson5Files() {
         println("\n===============================\n\n")
     }
 }
-
 
 fun testEmployeeSerialization() {
     val fileName = "employee-example.json5"
@@ -80,17 +80,18 @@ fun testEmployeeSerialization() {
  */
 fun testBasicParsingAndStringifying() {
     println("\n--- Testing Basic Parsing and Stringifying ---")
-    
+
     try {
         // Parse JSON5 to strongly-typed JSON5Value objects
-        val json5 = """
-        {
-            // Configuration for my app
-            name: 'MyApp',
-            version: 2,
-            features: ['auth', 'analytics',], // trailing comma
-        }
-        """.trimIndent()
+        val json5 =
+            """
+            {
+                // Configuration for my app
+                name: 'MyApp',
+                version: 2,
+                features: ['auth', 'analytics',], // trailing comma
+            }
+            """.trimIndent()
 
         val parsed = JSON5.parse(json5)
         println("✓ Parsed JSON5 successfully: $parsed")
@@ -101,23 +102,25 @@ fun testBasicParsingAndStringifying() {
                 val name = parsed.value["name"] as? JSON5Value.String
                 val version = parsed.value["version"] as? JSON5Value.Number
                 val features = parsed.value["features"] as? JSON5Value.Array
-                
+
                 println("✓ App name: ${name?.value}") // "MyApp"
-                println("✓ Version: ${(version as? JSON5Value.Number.Integer)?.value ?: (version as? JSON5Value.Number.Decimal)?.value?.toInt()}") // 2
+                println(
+                    "✓ Version: ${(version as? JSON5Value.Number.Integer)?.value ?: (version as? JSON5Value.Number.Decimal)?.value?.toInt()}",
+                ) // 2
                 println("✓ Features: ${features?.value?.map { (it as JSON5Value.String).value }}") // ["auth", "analytics"]
             }
             else -> println("Parsed value is not an object")
         }
 
         // Stringify Kotlin objects to JSON5
-        val data = mapOf(
-            "name" to "MyApp", 
-            "version" to 2,
-            "enabled" to true
-        )
+        val data =
+            mapOf(
+                "name" to "MyApp",
+                "version" to 2,
+                "enabled" to true,
+            )
         val json5String = JSON5.stringify(data)
         println("✓ Stringified to JSON5: $json5String")
-        
     } catch (e: Exception) {
         println("⚠️ Error in basic parsing and stringifying test: ${e.message}")
         e.printStackTrace()
@@ -129,47 +132,48 @@ fun testBasicParsingAndStringifying() {
  */
 fun testKotlinxSerializationIntegration() {
     println("\n--- Testing kotlinx.serialization Integration ---")
-    
+
     try {
         @Serializable
         data class Config(
             val appName: String,
             val version: Int,
             val features: List<String>,
-            val settings: Map<String, String>
+            val settings: Map<String, String>,
         )
 
         // Serialize to JSON5
-        val config = Config(
-            appName = "MyApp",
-            version = 2,
-            features = listOf("auth", "analytics"),
-            settings = mapOf("theme" to "dark", "lang" to "en")
-        )
+        val config =
+            Config(
+                appName = "MyApp",
+                version = 2,
+                features = listOf("auth", "analytics"),
+                settings = mapOf("theme" to "dark", "lang" to "en"),
+            )
 
         val json5 = JSON5.encodeToString(Config.serializer(), config)
         println("✓ Serialized to JSON5: $json5")
 
         // Deserialize from JSON5 (with comments and formatting)
-        val json5WithComments = """
-        {
-            // Application configuration
-            appName: 'MyApp',
-            version: 2, // current version
-            features: [
-                'auth',
-                'analytics', // trailing comma OK
-            ],
-            settings: {
-                theme: 'dark',
-                lang: 'en',
+        val json5WithComments =
+            """
+            {
+                // Application configuration
+                appName: 'MyApp',
+                version: 2, // current version
+                features: [
+                    'auth',
+                    'analytics', // trailing comma OK
+                ],
+                settings: {
+                    theme: 'dark',
+                    lang: 'en',
+                }
             }
-        }
-        """.trimIndent()
+            """.trimIndent()
 
         val decoded = JSON5.decodeFromString(Config.serializer(), json5WithComments)
         println("✓ Deserialized from JSON5 with comments: $decoded")
-        
     } catch (e: Exception) {
         println("⚠️ Error in kotlinx.serialization integration test: ${e.message}")
         e.printStackTrace()
@@ -181,21 +185,24 @@ fun testKotlinxSerializationIntegration() {
  */
 fun testAdvancedFeatures() {
     println("\n--- Testing Advanced Features ---")
-    
+
     try {
         // JSON5 supports various number formats
-        val numbers = JSON5.parse("""
-        {
-            hex: 0xDECAF,
-            leadingDot: .8675309,
-            trailingDot: 8675309.,
-            positiveSign: +1,
-            scientific: 6.02e23,
-            infinity: Infinity,
-            negativeInfinity: -Infinity,
-            notANumber: NaN
-        }
-        """.trimIndent())
+        val numbers =
+            JSON5.parse(
+                """
+                {
+                    hex: 0xDECAF,
+                    leadingDot: .8675309,
+                    trailingDot: 8675309.,
+                    positiveSign: +1,
+                    scientific: 6.02e23,
+                    infinity: Infinity,
+                    negativeInfinity: -Infinity,
+                    notANumber: NaN
+                }
+                """.trimIndent(),
+            )
 
         println("✓ Parsed numbers JSON5 successfully: $numbers")
 
@@ -205,8 +212,10 @@ fun testAdvancedFeatures() {
                 val hex = numbers.value["hex"] as? JSON5Value.Number
                 val infinity = numbers.value["infinity"] as? JSON5Value.Number.PositiveInfinity
                 val nan = numbers.value["notANumber"] as? JSON5Value.Number.NaN
-                
-                println("✓ Hex value: ${(hex as? JSON5Value.Number.Hexadecimal)?.value ?: (hex as? JSON5Value.Number.Decimal)?.value?.toLong()}") // 912559
+
+                println(
+                    "✓ Hex value: ${(hex as? JSON5Value.Number.Hexadecimal)?.value ?: (hex as? JSON5Value.Number.Decimal)?.value?.toLong()}",
+                ) // 912559
                 println("✓ Is infinity: ${infinity != null}") // true
                 println("✓ Is NaN: ${nan != null}") // true
             }
@@ -214,16 +223,19 @@ fun testAdvancedFeatures() {
         }
 
         // Multi-line strings and comments
-        val complex = JSON5.parse("""
-        {
-            multiLine: "This is a \
-        multi-line string",
-            /* Block comment
-               spanning multiple lines */
-            singleQuoted: 'Can contain "double quotes"',
-            unquoted: 'keys work too'
-        }
-        """.trimIndent())
+        val complex =
+            JSON5.parse(
+                """
+                {
+                    multiLine: "This is a \
+                multi-line string",
+                    /* Block comment
+                       spanning multiple lines */
+                    singleQuoted: 'Can contain "double quotes"',
+                    unquoted: 'keys work too'
+                }
+                """.trimIndent(),
+            )
 
         println("✓ Parsed complex JSON5 successfully: $complex")
 
@@ -232,13 +244,12 @@ fun testAdvancedFeatures() {
             is JSON5Value.Object -> {
                 val multiLine = complex.value["multiLine"] as? JSON5Value.String
                 val singleQuoted = complex.value["singleQuoted"] as? JSON5Value.String
-                
+
                 println("✓ Multi-line: ${multiLine?.value}")
                 println("✓ Single quoted: ${singleQuoted?.value}")
             }
             else -> println("Complex value is not an object")
         }
-        
     } catch (e: Exception) {
         println("⚠️ Error in advanced features test: ${e.message}")
         e.printStackTrace()
@@ -250,7 +261,7 @@ fun testAdvancedFeatures() {
  */
 fun testMigrationCompatibility() {
     println("\n--- Testing Migration Compatibility ---")
-    
+
     try {
         // New API - Type-safe approach (recommended)
         val result = JSON5.parse("""{"key": "value"}""")
@@ -263,8 +274,8 @@ fun testMigrationCompatibility() {
         }
 
         // Alternative: Convert to raw objects when needed
-        fun JSON5Value.toRawObject(): Any? {
-            return when (this) {
+        fun JSON5Value.toRawObject(): Any? =
+            when (this) {
                 is JSON5Value.Null -> null
                 is JSON5Value.Boolean -> this.value
                 is JSON5Value.String -> this.value
@@ -277,13 +288,11 @@ fun testMigrationCompatibility() {
                 is JSON5Value.Object -> this.value.mapValues { it.value.toRawObject() }
                 is JSON5Value.Array -> this.value.map { it.toRawObject() }
             }
-        }
 
         // Using the helper for compatibility
         val rawResult = JSON5.parse("""{"key": "value"}""").toRawObject()
         val map = rawResult as Map<String, Any?>
         println("✓ Compatibility helper result: ${map["key"]}") // "value"
-        
     } catch (e: Exception) {
         println("⚠️ Error in migration compatibility test: ${e.message}")
         e.printStackTrace()

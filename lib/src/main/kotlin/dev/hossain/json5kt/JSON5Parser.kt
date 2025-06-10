@@ -3,12 +3,12 @@ package dev.hossain.json5kt
 /**
  * Parser for JSON5 syntax
  * Converts JSON5 text into Kotlin objects
- * 
+ *
  * **Performance Optimizations:**
  * - Uses LinkedHashMap with initial capacity for better memory allocation
  * - Uses ArrayList with pre-sizing for array parsing
  * - Optimized object and array parsing methods
- * 
+ *
  * @since 1.1.0 Performance improvements for faster JSON5 parsing
  */
 internal object JSON5Parser {
@@ -19,9 +19,7 @@ internal object JSON5Parser {
      * @return The parsed value (Map, List, String, Number, Boolean, or null)
      * @throws JSON5Exception if the input is invalid JSON5
      */
-    fun parse(text: String): Any? {
-        return parse(text, null)
-    }
+    fun parse(text: String): Any? = parse(text, null)
 
     /**
      * Parses a JSON5 string into a Kotlin object, with a reviver function.
@@ -31,7 +29,10 @@ internal object JSON5Parser {
      * @return The parsed value (Map, List, String, Number, Boolean, or null)
      * @throws JSON5Exception if the input is invalid JSON5
      */
-    fun parse(text: String, reviver: ((key: String, value: Any?) -> Any?)? = null): Any? {
+    fun parse(
+        text: String,
+        reviver: ((key: String, value: Any?) -> Any?)? = null,
+    ): Any? {
         if (text.isEmpty()) {
             throw JSON5Exception.invalidEndOfInput(1, 1)
         }
@@ -60,7 +61,11 @@ internal object JSON5Parser {
         }
     }
 
-    private fun internalize(holder: Map<String, Any?>, name: String, reviver: (key: String, value: Any?) -> Any?): Any? {
+    private fun internalize(
+        holder: Map<String, Any?>,
+        name: String,
+        reviver: (key: String, value: Any?) -> Any?,
+    ): Any? {
         val value = holder[name]
 
         // Process objects and arrays recursively
@@ -107,8 +112,11 @@ internal object JSON5Parser {
         return reviver(name, value)
     }
 
-    private fun parseValue(token: Token, lexer: JSON5Lexer): Any? {
-        return when (token.type) {
+    private fun parseValue(
+        token: Token,
+        lexer: JSON5Lexer,
+    ): Any? =
+        when (token.type) {
             TokenType.NULL -> null
             TokenType.BOOLEAN -> (token as Token.BooleanToken).boolValue
             TokenType.STRING -> (token as Token.StringToken).stringValue
@@ -120,10 +128,13 @@ internal object JSON5Parser {
                     else -> throw JSON5Exception("Unexpected punctuator: ${token.punctuator}", token.line, token.column)
                 }
             }
-            TokenType.IDENTIFIER -> throw JSON5Exception("Unexpected identifier: ${(token as Token.IdentifierToken).identifierValue}", token.line, token.column)
+            TokenType.IDENTIFIER -> throw JSON5Exception(
+                "Unexpected identifier: ${(token as Token.IdentifierToken).identifierValue}",
+                token.line,
+                token.column,
+            )
             TokenType.EOF -> throw JSON5Exception("Unexpected end of input", token.line, token.column)
         }
-    }
 
     /**
      * Optimized object parsing with efficient map allocation.
@@ -144,18 +155,19 @@ internal object JSON5Parser {
             }
 
             // Parse the property name
-            val key = when (token.type) {
-                TokenType.STRING -> (token as Token.StringToken).stringValue
-                TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
-                TokenType.PUNCTUATOR -> {
-                    if ((token as Token.PunctuatorToken).punctuator == "}") {
-                        break // This is for handling empty objects or trailing commas
-                    } else {
-                        throw JSON5Exception("Expected property name or '}'", token.line, token.column)
+            val key =
+                when (token.type) {
+                    TokenType.STRING -> (token as Token.StringToken).stringValue
+                    TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
+                    TokenType.PUNCTUATOR -> {
+                        if ((token as Token.PunctuatorToken).punctuator == "}") {
+                            break // This is for handling empty objects or trailing commas
+                        } else {
+                            throw JSON5Exception("Expected property name or '}'", token.line, token.column)
+                        }
                     }
+                    else -> throw JSON5Exception("Expected property name or '}'", token.line, token.column)
                 }
-                else -> throw JSON5Exception("Expected property name or '}'", token.line, token.column)
-            }
 
             // Expect a colon
             token = lexer.nextToken()

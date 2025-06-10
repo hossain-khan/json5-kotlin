@@ -59,9 +59,9 @@ class JSON5ParserTestLargeFile {
         assert(firstFeature is Map<*, *>) { "First feature in data list should be a Map" }
         val firstFeatureMap = firstFeature as Map<String, Any?>
 
-        assertEquals("Accelerated2dCanvas", firstFeatureMap["name"]) {"First feature name mismatch"}
-        assertEquals(true, firstFeatureMap["settable_from_internals"]) {"First feature settable_from_internals mismatch"}
-        assertEquals("stable", firstFeatureMap["status"]) {"First feature status mismatch"}
+        assertEquals("Accelerated2dCanvas", firstFeatureMap["name"]) { "First feature name mismatch" }
+        assertEquals(true, firstFeatureMap["settable_from_internals"]) { "First feature settable_from_internals mismatch" }
+        assertEquals("stable", firstFeatureMap["status"]) { "First feature status mismatch" }
 
         // Example: Find a specific feature and validate its properties
         val adInterestGroupAPI = dataList.find { it is Map<*, *> && (it as Map<String, Any?>)["name"] == "AdInterestGroupAPI" }
@@ -82,5 +82,4 @@ class JSON5ParserTestLargeFile {
         assertEquals("experimental", aiPromptAPIStatusMap["Win"]) { "'AIPromptAPI' status for Win mismatch" }
         assertEquals("experimental", aiPromptAPIStatusMap["Mac"]) { "'AIPromptAPI' status for Mac mismatch" }
     }
-
 }

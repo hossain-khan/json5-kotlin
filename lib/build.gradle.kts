@@ -3,6 +3,7 @@ plugins {
     id("buildsrc.convention.kotlin-jvm")
     alias(libs.plugins.kover)
     alias(libs.plugins.kotlinPluginSerialization)
+    alias(libs.plugins.kotlinter)
     `maven-publish`
 }
 

@@ -1,6 +1,7 @@
 package dev.hossain.json5kt
 
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 
 /**
  * JSON5 Implementation for Kotlin
@@ -33,7 +34,10 @@ object JSON5 {
      * @return The parsed value as a JSON5Value
      * @throws JSON5Exception if the input is invalid JSON5
      */
-    fun parse(text: String, reviver: (key: String, value: Any?) -> Any?): JSON5Value {
+    fun parse(
+        text: String,
+        reviver: (key: String, value: Any?) -> Any?,
+    ): JSON5Value {
         val result = JSON5Parser.parse(text, reviver)
         return JSON5Value.from(result)
     }
@@ -45,9 +49,10 @@ object JSON5 {
      * @param space Number of spaces for indentation or a string to use for indentation
      * @return The JSON5 string representation
      */
-    fun stringify(value: Any?, space: Any? = null): String {
-        return JSON5Serializer.stringify(value, space)
-    }
+    fun stringify(
+        value: Any?,
+        space: Any? = null,
+    ): String = JSON5Serializer.stringify(value, space)
 
     /**
      * Encodes the given [value] to JSON5 string using kotlinx.serialization.
@@ -59,15 +64,16 @@ object JSON5 {
      * ```kotlin
      * @Serializable
      * data class Config(val name: String, val version: Int)
-     * 
+     *
      * val config = Config("MyApp", 1)
      * val json5 = JSON5.encodeToString(Config.serializer(), config)
      * // Result: {name:'MyApp',version:1}
      * ```
      */
-    fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String {
-        return format.encodeToString(serializer, value)
-    }
+    fun <T> encodeToString(
+        serializer: SerializationStrategy<T>,
+        value: T,
+    ): String = format.encodeToString(serializer, value)
 
     /**
      * Decodes the given JSON5 [string] to a value of type [T] using kotlinx.serialization.
@@ -79,7 +85,7 @@ object JSON5 {
      * ```kotlin
      * @Serializable
      * data class Config(val name: String, val version: Int)
-     * 
+     *
      * val json5 = """
      *     {
      *         // Application name
@@ -91,7 +97,8 @@ object JSON5 {
      * // Result: Config(name="MyApp", version=1)
      * ```
      */
-    fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
-        return format.decodeFromString(deserializer, string)
-    }
+    fun <T> decodeFromString(
+        deserializer: DeserializationStrategy<T>,
+        string: String,
+    ): T = format.decodeFromString(deserializer, string)
 }

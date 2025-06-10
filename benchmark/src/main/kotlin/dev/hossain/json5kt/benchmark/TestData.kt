@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 data class SimplePerson(
     val name: String,
     val age: Int,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
 )
 
 @Serializable
@@ -24,7 +24,7 @@ data class ComplexPerson(
     val address: Address,
     val phoneNumbers: List<String>,
     val skills: List<String>,
-    val metadata: Map<String, String>
+    val metadata: Map<String, String>,
 )
 
 @Serializable
@@ -33,7 +33,7 @@ data class Address(
     val city: String,
     val state: String,
     val zipCode: String,
-    val country: String
+    val country: String,
 )
 
 @Serializable
@@ -43,7 +43,7 @@ data class Company(
     val departments: List<Department>,
     val founded: Int,
     val revenue: Long,
-    val isPublic: Boolean
+    val isPublic: Boolean,
 )
 
 @Serializable
@@ -51,7 +51,7 @@ data class Department(
     val name: String,
     val manager: SimplePerson,
     val budget: Double,
-    val projects: List<String>
+    val projects: List<String>,
 )
 
 @Serializable
@@ -61,7 +61,7 @@ data class NumberTypes(
     val doubleValue: Double,
     val floatValue: Float,
     val byteValue: Byte,
-    val shortValue: Short
+    val shortValue: Short,
 )
 
 @Serializable
@@ -72,5 +72,5 @@ data class CollectionTypes(
     val nestedList: List<List<String>>,
     val stringMap: Map<String, String>,
     val intMap: Map<String, Int>,
-    val nestedMap: Map<String, Map<String, String>>
+    val nestedMap: Map<String, Map<String, String>>,
 )

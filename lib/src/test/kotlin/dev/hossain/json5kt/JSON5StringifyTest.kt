@@ -2,8 +2,8 @@ package dev.hossain.json5kt
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
  * Tests for the `JSON5.stringify()` method.
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.DisplayName
  */
 @DisplayName("JSON5.stringify")
 class JSON5StringifyTest {
-
     /**
      * Tests stringifying an empty Kotlin Map.
      * Expected output is an empty JSON5 object: `{}`.
@@ -85,10 +84,11 @@ class JSON5StringifyTest {
      */
     @Test
     fun `should stringify nested objects and arrays`() {
-        val nested = mapOf(
-            "object" to mapOf("key" to "value"),
-            "array" to listOf(1, 2, 3)
-        )
+        val nested =
+            mapOf(
+                "object" to mapOf("key" to "value"),
+                "array" to listOf(1, 2, 3),
+            )
         JSON5.stringify(nested) shouldBe "{object:{key:'value'},array:[1,2,3]}"
     }
 
