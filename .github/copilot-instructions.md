@@ -7,6 +7,7 @@ This is a Kotlin based repository with a JSON5 library for parsing and serializi
 ### Development Flow
 - Build: `./gradlew build`
 - Test: `./gradlew check`
+- Format: `./gradlew formatKotlin`
 
 ## Repository Structure
 - `lib` - Gradle module containing the core JSON5 library code with unit tests
@@ -15,6 +16,8 @@ This is a Kotlin based repository with a JSON5 library for parsing and serializi
 
 ## Key Guidelines
 1. Follow Kotlin best practices and idiomatic patterns
-2. Maintain existing code structure and organization
-3. Write unit tests for new functionality
-4. Update project README as needed to reflect changes
+2. Do not use wildcard imports
+3. Maintain existing code structure and organization
+4. Write unit tests for new functionality
+5. Format code using `./gradlew formatKotlin` before committing
+6. Update project README as needed to reflect changes
