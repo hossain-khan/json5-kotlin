@@ -8,6 +8,21 @@ import kotlinx.serialization.Serializable
  * Main application entry point for testing JSON5 parsing and serialization.
  */
 fun main() {
+    // Test serialization and deserialization of Employee model
+    testEmployeeSerialization()
+    
+    // Run README sample code validation tests
+    println("\n=== README Sample Code Validation ===")
+    testBasicParsingAndStringifying()
+    testKotlinxSerializationIntegration()
+    testAdvancedFeatures()
+    testMigrationCompatibility()
+
+    // Test sample JSON5 files from resources
+    testSampleJson5Files()
+}
+
+private fun testSampleJson5Files() {
     val json5files = listOf(
         "simple-object.json5",
         "array-example.json5",
@@ -36,16 +51,6 @@ fun main() {
         }
         println("\n===============================\n\n")
     }
-
-    // Test serialization and deserialization of Employee model
-    testEmployeeSerialization()
-    
-    // Run README sample code validation tests
-    println("\n=== README Sample Code Validation ===")
-    testBasicParsingAndStringifying()
-    testKotlinxSerializationIntegration()
-    testAdvancedFeatures()
-    testMigrationCompatibility()
 }
 
 
