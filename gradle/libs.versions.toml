@@ -12,6 +12,8 @@ junit = "5.10.1"
 kotest = "5.8.0"
 syntaxerrorJson5 = "2.1.0"
 
+kotlinter = "5.1.1"
+
 [libraries]
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
@@ -35,3 +37,8 @@ testing = ["junit", "kotestRunner", "kotestAssertions", "kotestProperty"]
 [plugins]
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kotlinxKover" }
+
+# Kotlin linter with built-in formatter
+# https://github.com/jeremymailen/kotlinter-gradle
+# https://github.com/pinterest/ktlint
+kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }

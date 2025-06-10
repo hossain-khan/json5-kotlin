@@ -10,8 +10,8 @@ package dev.hossain.json5kt
  * Converts a JSON5Value to a raw Any? object for testing compatibility.
  * This helper function maintains compatibility with the behavior of the deprecated parseToAny API.
  */
-fun JSON5Value.toAny(): Any? {
-    return when (this) {
+fun JSON5Value.toAny(): Any? =
+    when (this) {
         is JSON5Value.Null -> null
         is JSON5Value.Boolean -> this.value
         is JSON5Value.String -> this.value
@@ -24,4 +24,3 @@ fun JSON5Value.toAny(): Any? {
         is JSON5Value.Object -> this.value.mapValues { it.value.toAny() }
         is JSON5Value.Array -> this.value.map { it.toAny() }
     }
-}

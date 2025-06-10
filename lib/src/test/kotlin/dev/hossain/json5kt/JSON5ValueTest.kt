@@ -3,8 +3,8 @@ package dev.hossain.json5kt
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
  * Tests for JSON5Value parsing functionality.
@@ -12,9 +12,6 @@ import org.junit.jupiter.api.DisplayName
  */
 @DisplayName("JSON5.parse with JSON5Value")
 class JSON5ValueTest {
-
-
-
     @Test
     fun `should parse empty object to JSON5Value`() {
         val result = JSON5.parse("{}")
@@ -99,16 +96,16 @@ class JSON5ValueTest {
         val result = JSON5Value.from(kotlinObj)
         result.shouldBeInstanceOf<JSON5Value.Object>()
         val obj = result as JSON5Value.Object
-        
+
         obj.value["key"].shouldBeInstanceOf<JSON5Value.String>()
         (obj.value["key"] as JSON5Value.String).value shouldBe "value"
-        
+
         obj.value["number"].shouldBeInstanceOf<JSON5Value.Number.Decimal>()
         (obj.value["number"] as JSON5Value.Number.Decimal).value shouldBe 42.0
-        
+
         obj.value["bool"].shouldBeInstanceOf<JSON5Value.Boolean>()
         (obj.value["bool"] as JSON5Value.Boolean).value shouldBe true
-        
+
         obj.value["nullValue"] shouldBe JSON5Value.Null
     }
 
@@ -137,17 +134,17 @@ class JSON5ValueTest {
         val result = JSON5Value.from(kotlinList)
         result.shouldBeInstanceOf<JSON5Value.Array>()
         val arr = result as JSON5Value.Array
-        
+
         arr.value.size shouldBe 4
         arr.value[0].shouldBeInstanceOf<JSON5Value.String>()
         (arr.value[0] as JSON5Value.String).value shouldBe "hello"
-        
+
         arr.value[1].shouldBeInstanceOf<JSON5Value.Number.Decimal>()
         (arr.value[1] as JSON5Value.Number.Decimal).value shouldBe 42.0
-        
+
         arr.value[2].shouldBeInstanceOf<JSON5Value.Boolean>()
         (arr.value[2] as JSON5Value.Boolean).value shouldBe true
-        
+
         arr.value[3] shouldBe JSON5Value.Null
     }
 }

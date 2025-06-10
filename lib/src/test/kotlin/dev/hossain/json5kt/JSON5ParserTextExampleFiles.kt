@@ -22,17 +22,19 @@ class JSON5ParserTextExampleFiles {
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
 
-        val expected = mapOf(
-            "name" to "John Doe",
-            "age" to 30.0,
-            "isEmployed" to true,
-            "salary" to 75000.50,
-            "address" to mapOf(
-                "street" to "123 Main St",
-                "city" to "New York",
-                "zipCode" to 10001.0
+        val expected =
+            mapOf(
+                "name" to "John Doe",
+                "age" to 30.0,
+                "isEmployed" to true,
+                "salary" to 75000.50,
+                "address" to
+                    mapOf(
+                        "street" to "123 Main St",
+                        "city" to "New York",
+                        "zipCode" to 10001.0,
+                    ),
             )
-        )
 
         assertEquals(expected, result)
     }
@@ -48,20 +50,21 @@ class JSON5ParserTextExampleFiles {
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
 
-        val expected = listOf(
-            42.0,
-            "Hello World",
-            true,
-            null,
-            mapOf(
-                "name" to "Nested object",
-                "active" to true
-            ),
-            listOf(1.0, 2.0, 3.0),
-            Double.POSITIVE_INFINITY,
-            Double.NEGATIVE_INFINITY,
-            Double.NaN
-        )
+        val expected =
+            listOf(
+                42.0,
+                "Hello World",
+                true,
+                null,
+                mapOf(
+                    "name" to "Nested object",
+                    "active" to true,
+                ),
+                listOf(1.0, 2.0, 3.0),
+                Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,
+                Double.NaN,
+            )
 
         assertEquals(expected.size, (result as List<*>).size)
         for (i in expected.indices) {
@@ -99,23 +102,24 @@ class JSON5ParserTextExampleFiles {
         val path = Paths.get("src/test/resources/numeric-formats.json5")
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
-        val expected = mapOf(
-            "integer" to 42.0,
-            "negative" to -17.0,
-            "float" to 3.14159,
-            "leadingDecimal" to 0.25,
-            "trailingDecimal" to 5.0,
-            "positiveSign" to 42.0,
-            "hex" to 12648430.0,
-            "smallHex" to 255.0,
-            "negativeHex" to -123.0,
-            "scientific" to 6.02e23,
-            "negativeExp" to 1e-10,
-            "positiveExp" to 1.5e4,
-            "infinite" to Double.POSITIVE_INFINITY,
-            "negativeInfinite" to Double.NEGATIVE_INFINITY,
-            "notANumber" to Double.NaN
-        )
+        val expected =
+            mapOf(
+                "integer" to 42.0,
+                "negative" to -17.0,
+                "float" to 3.14159,
+                "leadingDecimal" to 0.25,
+                "trailingDecimal" to 5.0,
+                "positiveSign" to 42.0,
+                "hex" to 12648430.0,
+                "smallHex" to 255.0,
+                "negativeHex" to -123.0,
+                "scientific" to 6.02e23,
+                "negativeExp" to 1e-10,
+                "positiveExp" to 1.5e4,
+                "infinite" to Double.POSITIVE_INFINITY,
+                "negativeInfinite" to Double.NEGATIVE_INFINITY,
+                "notANumber" to Double.NaN,
+            )
         assertEquals(expected.size, (result as Map<*, *>).size)
         for ((k, v) in expected) {
             val actual = result[k]
@@ -138,19 +142,20 @@ class JSON5ParserTextExampleFiles {
         val path = Paths.get("src/test/resources/string-and-identifiers.json5")
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
-        val expected = mapOf(
-            "quotes" to "He said, \"Hello!\"",
-            "singleQuotes" to "It's working",
-            "multiline" to "This string spans multiple lines",
-            "lineSeparators" to "Line\u2028and\u2029paragraph separators",
-            "\$special_key" to "Dollar sign prefix",
-            "_under_score" to "Underscore prefix",
-            "ùñîçødë" to "Unicode property name",
-            "abc" to "abc via Unicode escapes",
-            "emptyObject" to emptyMap<String, Any?>(),
-            "emptyArray" to emptyList<Any?>(),
-            "indentedProperty" to 42.0
-        )
+        val expected =
+            mapOf(
+                "quotes" to "He said, \"Hello!\"",
+                "singleQuotes" to "It's working",
+                "multiline" to "This string spans multiple lines",
+                "lineSeparators" to "Line\u2028and\u2029paragraph separators",
+                "\$special_key" to "Dollar sign prefix",
+                "_under_score" to "Underscore prefix",
+                "ùñîçødë" to "Unicode property name",
+                "abc" to "abc via Unicode escapes",
+                "emptyObject" to emptyMap<String, Any?>(),
+                "emptyArray" to emptyList<Any?>(),
+                "indentedProperty" to 42.0,
+            )
         val resultMap = result as Map<*, *>
         assertEquals(expected.size, resultMap.size)
         for ((k, v) in expected) {
@@ -188,25 +193,26 @@ class JSON5ParserTextExampleFiles {
         val json5Text = Files.readString(path)
         val result = JSON5Parser.parse(json5Text)
 
-        val expected = mapOf(
-            "unquoted" to "and you can quote me on that",
-            "singleQuotes" to "I can use \"double quotes\" here",
-            "lineBreaks" to "Look, Mom! No \\n's!",
-            "hexadecimal" to 0xDECAF.toDouble(),
-            "leadingDecimalPoint" to 0.8675309,
-            "andTrailing" to 8675309.0,
-            "positiveSign" to 1.0,
-            "trailingComma" to "in objects",
-            "andIn" to listOf("arrays"),
-            "backwardsCompatible" to "with JSON"
-        )
+        val expected =
+            mapOf(
+                "unquoted" to "and you can quote me on that",
+                "singleQuotes" to "I can use \"double quotes\" here",
+                "lineBreaks" to "Look, Mom! No \\n's!",
+                "hexadecimal" to 0xDECAF.toDouble(),
+                "leadingDecimalPoint" to 0.8675309,
+                "andTrailing" to 8675309.0,
+                "positiveSign" to 1.0,
+                "trailingComma" to "in objects",
+                "andIn" to listOf("arrays"),
+                "backwardsCompatible" to "with JSON",
+            )
 
         assertEquals(expected, result)
     }
 
     /**
      * Tests parsing of a real-world HarmonyOS IDE hvigor build profile from `harmonyos-ide-hvigor-build-profile-V13.json5`.
-     * This file represents a complex build configuration with nested objects, arrays, 
+     * This file represents a complex build configuration with nested objects, arrays,
      * and extensive use of JSON5 features like comments and trailing commas.
      */
     @Test

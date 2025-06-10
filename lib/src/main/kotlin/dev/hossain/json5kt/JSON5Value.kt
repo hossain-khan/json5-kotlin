@@ -7,14 +7,15 @@ package dev.hossain.json5kt
  * @see <a href="https://spec.json5.org/">JSON5 Specification</a>
  */
 sealed class JSON5Value {
-
     /**
      * Represents a JSON5 object, which is a collection of name/value pairs.
      *
      * @property value The map of property names to JSON5 values
      * @see <a href="https://spec.json5.org/#objects">JSON5 Objects</a>
      */
-    data class Object(val value: Map<kotlin.String, JSON5Value>) : JSON5Value() {
+    data class Object(
+        val value: Map<kotlin.String, JSON5Value>,
+    ) : JSON5Value() {
         override fun toString(): kotlin.String = value.toString()
     }
 
@@ -24,7 +25,9 @@ sealed class JSON5Value {
      * @property value The list of JSON5 values
      * @see <a href="https://spec.json5.org/#arrays">JSON5 Arrays</a>
      */
-    data class Array(val value: List<JSON5Value>) : JSON5Value() {
+    data class Array(
+        val value: List<JSON5Value>,
+    ) : JSON5Value() {
         override fun toString(): kotlin.String = value.toString()
     }
 
@@ -34,7 +37,9 @@ sealed class JSON5Value {
      * @property value The string value
      * @see <a href="https://spec.json5.org/#strings">JSON5 Strings</a>
      */
-    data class String(val value: kotlin.String) : JSON5Value() {
+    data class String(
+        val value: kotlin.String,
+    ) : JSON5Value() {
         override fun toString(): kotlin.String = "\"$value\""
     }
 
@@ -49,7 +54,9 @@ sealed class JSON5Value {
          *
          * @property value The integer value
          */
-        data class Integer(val value: Long) : Number() {
+        data class Integer(
+            val value: Long,
+        ) : Number() {
             override fun toString(): kotlin.String = value.toString()
         }
 
@@ -58,7 +65,9 @@ sealed class JSON5Value {
          *
          * @property value The decimal value
          */
-        data class Decimal(val value: Double) : Number() {
+        data class Decimal(
+            val value: Double,
+        ) : Number() {
             override fun toString(): kotlin.String = value.toString()
         }
 
@@ -67,7 +76,9 @@ sealed class JSON5Value {
          *
          * @property value The integer value represented by the hex
          */
-        data class Hexadecimal(val value: Long) : Number() {
+        data class Hexadecimal(
+            val value: Long,
+        ) : Number() {
             override fun toString(): kotlin.String = "0x${value.toString(16)}"
         }
 
@@ -99,7 +110,9 @@ sealed class JSON5Value {
      * @property value The boolean value
      * @see <a href="https://spec.json5.org/#primitives">JSON5 Primitives</a>
      */
-    data class Boolean(val value: kotlin.Boolean) : JSON5Value() {
+    data class Boolean(
+        val value: kotlin.Boolean,
+    ) : JSON5Value() {
         override fun toString(): kotlin.String = value.toString()
     }
 
@@ -123,8 +136,8 @@ sealed class JSON5Value {
          * @return The corresponding JSON5Value
          * @throws IllegalArgumentException if the value type is not supported
          */
-        fun from(value: Any?): JSON5Value {
-            return when (value) {
+        fun from(value: Any?): JSON5Value =
+            when (value) {
                 null -> Null
                 is Map<*, *> -> {
                     val jsonMap = mutableMapOf<kotlin.String, JSON5Value>()
@@ -154,6 +167,5 @@ sealed class JSON5Value {
                 is kotlin.Boolean -> Boolean(value)
                 else -> throw IllegalArgumentException("Unsupported type: ${value::class.java}")
             }
-        }
     }
 }

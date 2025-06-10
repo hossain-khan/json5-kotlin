@@ -4,9 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain // Added this import
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
-import kotlin.Double.Companion.NaN
+import org.junit.jupiter.api.Test
 import kotlin.math.pow
 import kotlin.test.Ignore
 import kotlin.test.assertTrue
@@ -20,9 +19,6 @@ import kotlin.test.assertTrue
  */
 @DisplayName("JSON5.parse")
 class JSON5ParseTest {
-    
-
-
     /**
      * Tests parsing of an empty JSON5 object.
      */
@@ -115,9 +111,10 @@ class JSON5ParseTest {
     fun `should parse special character property names`() {
         // Original: JSON5.parse("""{\${"$"}_:1,_\$:2,a\u200C:3}""").toAny() shouldBe mapOf("\$_" to 1.0, "_$" to 2.0, "a\u200C" to 3.0)
         // Adjusted to reflect current parser bug
-        val exception = shouldThrow<JSON5Exception> {
-            JSON5.parse("""{\${"$"}_:1,_\$:2,a\u200C:3}""").toAny()
-        }
+        val exception =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("""{\${"$"}_:1,_\$:2,a\u200C:3}""").toAny()
+            }
         exception.message!! shouldContain "invalid character '$'"
         exception.lineNumber shouldBe 1
         exception.columnNumber shouldBe 3
@@ -143,9 +140,10 @@ class JSON5ParseTest {
         // Note: The double backslashes in the test string become single backslashes in the actual string
         // Original line: JSON5.parse("""{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}""").toAny() shouldBe mapOf("ab" to 1.0, "\$_" to 2.0, "_$" to 3.0)
         // Adjusted to reflect current parser bug
-        val exception = shouldThrow<JSON5Exception> {
-            JSON5.parse("""{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}""").toAny()
-        }
+        val exception =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("""{\\u0061\\u0062:1,\\u0024\\u005F:2,\\u005F\\u0024:3}""").toAny()
+            }
         exception.message!! shouldContain "invalid character '\\'"
         exception.lineNumber shouldBe 1
         exception.columnNumber shouldBe 3
@@ -419,7 +417,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should modify nested object property values using reviver`() {
-        JSON5.parse("{a:{b:2}}") { k, v -> if (k == "b") "revived" else v  }.toAny() shouldBe mapOf("a" to mapOf("b" to "revived"))
+        JSON5.parse("{a:{b:2}}") { k, v -> if (k == "b") "revived" else v }.toAny() shouldBe mapOf("a" to mapOf("b" to "revived"))
     }
 
     /**
@@ -428,7 +426,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should delete property values using reviver`() {
-        JSON5.parse("{a:1,b:2}") { k, v -> if (k == "a") null else v  }.toAny() shouldBe mapOf("b" to 2.0)
+        JSON5.parse("{a:1,b:2}") { k, v -> if (k == "a") null else v }.toAny() shouldBe mapOf("b" to 2.0)
     }
 
     /**
@@ -436,7 +434,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should modify array values using reviver`() {
-        JSON5.parse("[0,1,2]") { k, v -> if (k == "1") "revived" else v  }.toAny() shouldBe listOf(0.0, "revived", 2.0)
+        JSON5.parse("[0,1,2]") { k, v -> if (k == "1") "revived" else v }.toAny() shouldBe listOf(0.0, "revived", 2.0)
     }
 
     /**
@@ -444,7 +442,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should modify nested array values using reviver`() {
-        JSON5.parse("[0,[1,2,3]]") { k, v -> if (k == "2") "revived" else v  }.toAny() shouldBe listOf(0.0, listOf(1.0, 2.0, "revived"))
+        JSON5.parse("[0,[1,2,3]]") { k, v -> if (k == "2") "revived" else v }.toAny() shouldBe listOf(0.0, listOf(1.0, 2.0, "revived"))
     }
 
     /**
@@ -453,7 +451,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should delete array values using reviver`() {
-        val result = JSON5.parse("[0,1,2]") { k, v -> if (k == "1") null else v  }.toAny() as List<*>
+        val result = JSON5.parse("[0,1,2]") { k, v -> if (k == "1") null else v }.toAny() as List<*>
         result[0] shouldBe 0.0
         result[1] shouldBe null
         result[2] shouldBe 2.0
@@ -465,7 +463,7 @@ class JSON5ParseTest {
      */
     @Test
     fun `should modify the root value using reviver`() {
-        JSON5.parse("1") { k, v -> if (k == "") "revived" else v  }.toAny() shouldBe "revived"
+        JSON5.parse("1") { k, v -> if (k == "") "revived" else v }.toAny() shouldBe "revived"
     }
 
     /**
@@ -473,9 +471,10 @@ class JSON5ParseTest {
      */
     @Test
     fun `should throw exception for invalid JSON5`() {
-        val exception = shouldThrow<JSON5Exception> {
-            JSON5.parse("{invalid}").toAny()
-        }
+        val exception =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("{invalid}").toAny()
+            }
         exception.lineNumber shouldBe 1
     }
 
@@ -537,29 +536,34 @@ class JSON5ParseTest {
     @Test
     @DisplayName("should handle invalid hexadecimal numbers")
     fun `parse invalid hexadecimal numbers`() {
-        val ex1 = shouldThrow<JSON5Exception> {
-            JSON5.parse("0x").toAny()
-        }
+        val ex1 =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("0x").toAny()
+            }
         ex1.message shouldContain "invalid character ' ' at line 1, column 2"
 
-        val ex2 = shouldThrow<JSON5Exception> {
-            JSON5.parse("-0x").toAny()
-        }
+        val ex2 =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("-0x").toAny()
+            }
         ex2.message shouldContain "invalid character ' ' at line 1, column 3"
 
-        val ex3 = shouldThrow<JSON5Exception> {
-            JSON5.parse("0xG").toAny()
-        }
+        val ex3 =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("0xG").toAny()
+            }
         ex3.message shouldContain "invalid character 'G' at line 1, column 3"
 
-        val ex4 = shouldThrow<JSON5Exception> {
-            JSON5.parse("+0xG").toAny()
-        }
+        val ex4 =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("+0xG").toAny()
+            }
         ex4.message shouldContain "invalid character 'G' at line 1, column 4"
 
-        val ex5 = shouldThrow<JSON5Exception> {
-            JSON5.parse("0x12G").toAny()
-        }
+        val ex5 =
+            shouldThrow<JSON5Exception> {
+                JSON5.parse("0x12G").toAny()
+            }
         ex5.message shouldContain "invalid character 'G' at line 1, column 5"
     }
 

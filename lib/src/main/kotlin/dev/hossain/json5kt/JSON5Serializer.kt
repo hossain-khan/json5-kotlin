@@ -2,13 +2,13 @@ package dev.hossain.json5kt
 
 /**
  * JSON5Serializer is responsible for serializing Kotlin objects to JSON5 text.
- * 
+ *
  * **Performance Optimizations:**
  * - Fast path for simple strings that don't require escaping
  * - Pre-allocated StringBuilder with estimated capacity
  * - Efficient character handling in string serialization
  * - Pre-sized collections for object and array serialization
- * 
+ *
  * @since 1.1.0 Performance improvements for faster JSON5 string generation
  */
 internal object JSON5Serializer {
@@ -19,25 +19,34 @@ internal object JSON5Serializer {
      * @param space Number of spaces for indentation or a string to use for indentation
      * @return The JSON5 string representation
      */
-    fun stringify(value: Any?, space: Any? = null): String {
+    fun stringify(
+        value: Any?,
+        space: Any? = null,
+    ): String {
         val visitor = SerializerVisitor(space)
         return visitor.serializeValue(value)
     }
 
-    private class SerializerVisitor(space: Any?) {
+    private class SerializerVisitor(
+        space: Any?,
+    ) {
         private val stack = mutableListOf<Any>()
         private val gap: String
 
         init {
-            gap = when (space) {
-                is Int -> " ".repeat(minOf(10, maxOf(0, space)))
-                is String -> space.substring(0, minOf(10, space.length))
-                else -> ""
-            }
+            gap =
+                when (space) {
+                    is Int -> " ".repeat(minOf(10, maxOf(0, space)))
+                    is String -> space.substring(0, minOf(10, space.length))
+                    else -> ""
+                }
         }
 
-        fun serializeValue(value: Any?, indent: String = ""): String {
-            return when (value) {
+        fun serializeValue(
+            value: Any?,
+            indent: String = "",
+        ): String =
+            when (value) {
                 null -> "null"
                 is Boolean -> value.toString()
                 is Number -> serializeNumber(value)
@@ -47,10 +56,9 @@ internal object JSON5Serializer {
                 is Array<*> -> serializeArray(value.toList(), indent)
                 else -> "null" // Unsupported types are serialized as null
             }
-        }
 
-        private fun serializeNumber(value: Number): String {
-            return when(value) {
+        private fun serializeNumber(value: Number): String =
+            when (value) {
                 is Double -> {
                     when {
                         value.isNaN() -> "NaN"
@@ -69,7 +77,6 @@ internal object JSON5Serializer {
                 }
                 else -> value.toString()
             }
-        }
 
         /**
          * Optimized string serialization with reduced allocations.
@@ -77,11 +84,26 @@ internal object JSON5Serializer {
          */
         private fun serializeString(value: String): String {
             // Fast path for simple strings that don't need escaping
-            if (value.none { it < ' ' || it == '\\' || it == '\'' || it == '"' || it == '\b' || it == '\u000C' || it == '\n' || it == '\r' || it == '\t' || it == '\u000B' || it == '\u0000' || it == '\u2028' || it == '\u2029' }) {
+            if (value.none {
+                    it < ' ' ||
+                        it == '\\' ||
+                        it == '\'' ||
+                        it == '"' ||
+                        it == '\b' ||
+                        it == '\u000C' ||
+                        it == '\n' ||
+                        it == '\r' ||
+                        it == '\t' ||
+                        it == '\u000B' ||
+                        it == '\u0000' ||
+                        it == '\u2028' ||
+                        it == '\u2029'
+                }
+            ) {
                 val quote = if (value.contains('\'') && !value.contains('"')) '"' else '\''
                 return "$quote$value$quote"
             }
-            
+
             val quote = if (value.contains('\'') && !value.contains('"')) '"' else '\''
             // Pre-allocate with estimated capacity to reduce resizing
             val sb = StringBuilder(value.length + 10)
@@ -121,7 +143,10 @@ internal object JSON5Serializer {
         /**
          * Optimized object serialization with reduced allocations.
          */
-        private fun serializeObject(obj: Map<Any?, Any?>, indent: String): String {
+        private fun serializeObject(
+            obj: Map<Any?, Any?>,
+            indent: String,
+        ): String {
             if (obj.isEmpty()) return "{}"
 
             // Check for circular references
@@ -131,34 +156,37 @@ internal object JSON5Serializer {
 
             stack.add(obj)
 
-            val newIndent = if (gap.isNotEmpty()) {
-                indent + gap
-            } else {
-                indent
-            }
+            val newIndent =
+                if (gap.isNotEmpty()) {
+                    indent + gap
+                } else {
+                    indent
+                }
 
             // Pre-allocate list with known size for better performance
             val properties = ArrayList<String>(obj.size)
-            
+
             for ((key, value) in obj) {
                 val keyStr = key.toString()
                 val propName = serializePropertyName(keyStr)
                 val propValue = serializeValue(value, newIndent)
 
-                val property = if (gap.isNotEmpty()) {
-                    // Use exactly one space after the colon when formatting
-                    "$newIndent$propName: $propValue"
-                } else {
-                    "$propName:$propValue"
-                }
+                val property =
+                    if (gap.isNotEmpty()) {
+                        // Use exactly one space after the colon when formatting
+                        "$newIndent$propName: $propValue"
+                    } else {
+                        "$propName:$propValue"
+                    }
                 properties.add(property)
             }
 
-            val joined = if (gap.isNotEmpty()) {
-                properties.joinToString(",\n")
-            } else {
-                properties.joinToString(",")
-            }
+            val joined =
+                if (gap.isNotEmpty()) {
+                    properties.joinToString(",\n")
+                } else {
+                    properties.joinToString(",")
+                }
 
             stack.removeAt(stack.size - 1)
 
@@ -200,7 +228,10 @@ internal object JSON5Serializer {
         /**
          * Optimized array serialization with reduced allocations.
          */
-        private fun serializeArray(array: List<*>, indent: String): String {
+        private fun serializeArray(
+            array: List<*>,
+            indent: String,
+        ): String {
             if (array.isEmpty()) return "[]"
 
             // Check for circular references
@@ -210,30 +241,33 @@ internal object JSON5Serializer {
 
             stack.add(array)
 
-            val newIndent = if (gap.isNotEmpty()) {
-                indent + gap
-            } else {
-                indent
-            }
+            val newIndent =
+                if (gap.isNotEmpty()) {
+                    indent + gap
+                } else {
+                    indent
+                }
 
             // Pre-allocate list with known size for better performance
             val elements = ArrayList<String>(array.size)
-            
+
             for (value in array) {
                 val serialized = serializeValue(value, newIndent)
-                val element = if (gap.isNotEmpty()) {
-                    "$newIndent$serialized"
-                } else {
-                    serialized
-                }
+                val element =
+                    if (gap.isNotEmpty()) {
+                        "$newIndent$serialized"
+                    } else {
+                        serialized
+                    }
                 elements.add(element)
             }
 
-            val joined = if (gap.isNotEmpty()) {
-                elements.joinToString(",\n")
-            } else {
-                elements.joinToString(",")
-            }
+            val joined =
+                if (gap.isNotEmpty()) {
+                    elements.joinToString(",\n")
+                } else {
+                    elements.joinToString(",")
+                }
 
             stack.removeAt(stack.size - 1)
 

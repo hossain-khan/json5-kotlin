@@ -7,13 +7,13 @@ data class Address(
     val street: String,
     val city: String,
     val state: String,
-    val zip: String
+    val zip: String,
 )
 
 @Serializable
 data class Contact(
     val email: String,
-    val phone: String? = null
+    val phone: String? = null,
 )
 
 @Serializable
@@ -23,5 +23,5 @@ data class Employee(
     val position: String,
     val address: Address,
     val contact: Contact,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
 )
