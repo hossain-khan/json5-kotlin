@@ -9,6 +9,41 @@ A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful f
 
 <a href="https://github.com/hossain-khan/json5-kotlin/tree/main/benchmark"><img src="project-assets/benchmark-charts/json5-by-library-type.png" width="600" alt="Benchmark with different JSON libraries"></a>
 
+
+### Architecture Overview
+```mermaid
+graph TD
+    subgraph lib [lib: JSON5 Core Library]
+        JSON5
+        JSON5Parser
+        JSON5Lexer
+        JSON5Serializer
+        JSON5Value
+        JSON5Exception
+    end
+
+    subgraph app [app: Application]
+        AppCode
+    end
+
+    subgraph benchmark [benchmark: Performance Benchmarks]
+        BenchmarkCode
+    end
+
+    AppCode -->|uses| JSON5
+    BenchmarkCode -->|uses| JSON5
+
+    JSON5 -->|parsing| JSON5Parser
+    JSON5Parser -->|tokenizes| JSON5Lexer
+    JSON5 -->|serializing| JSON5Serializer
+    JSON5Parser -->|returns| JSON5Value
+    JSON5Serializer -->|outputs| JSON5Value
+    JSON5Parser -->|errors| JSON5Exception
+    JSON5Lexer -->|errors| JSON5Exception
+    JSON5Serializer -->|errors| JSON5Exception
+```
+
+
 ## Features
 
 [JSON5](https://json5.org/) extends JSON with the following features:
