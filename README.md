@@ -5,8 +5,9 @@ JSON5 implementation for Kotlin/JVM
 A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful features like comments, trailing commas, and unquoted keys while maintaining full backward compatibility with JSON.
 
 > [!CAUTION]
-> _This is an experimental proof-of-concept project developed entirely using agentic AIs. Some functionality may be incomplete or unstable._
+> _This is an experimental proof-of-concept project developed entirely using agentic AIs. Some functionality may be incomplete or unstable ([learn more](https://hossainkhan.medium.com/vibe-coding-to-blind-coding-986f8f0b7b09))_
 
+<img src="project-assets/benchmark-charts/json5-by-library-type.png" width="600" alt="Benchmark with different JSON libraries">
 
 ## Features
 
