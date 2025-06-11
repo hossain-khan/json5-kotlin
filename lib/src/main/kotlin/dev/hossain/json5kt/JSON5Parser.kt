@@ -155,19 +155,20 @@ internal object JSON5Parser {
 
         while (true) {
             // Parse the property name with optimized token handling
-            val key = when (token.type) {
-                TokenType.STRING -> (token as Token.StringToken).stringValue
-                TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
-                TokenType.PUNCTUATOR -> {
-                    if ((token as Token.PunctuatorToken).punctuator == "}") {
-                        break // This is for handling empty objects or trailing commas
-                    } else {
-                        throw JSON5Exception("Expected property name or '}'", token.line, token.column)
+            val key =
+                when (token.type) {
+                    TokenType.STRING -> (token as Token.StringToken).stringValue
+                    TokenType.IDENTIFIER -> (token as Token.IdentifierToken).identifierValue
+                    TokenType.PUNCTUATOR -> {
+                        if ((token as Token.PunctuatorToken).punctuator == "}") {
+                            break // This is for handling empty objects or trailing commas
+                        } else {
+                            throw JSON5Exception("Expected property name or '}'", token.line, token.column)
+                        }
                     }
+                    TokenType.EOF -> throw JSON5Exception.invalidEndOfInput(token.line, token.column)
+                    else -> throw JSON5Exception("Expected property name or '}'", token.line, token.column)
                 }
-                TokenType.EOF -> throw JSON5Exception.invalidEndOfInput(token.line, token.column)
-                else -> throw JSON5Exception("Expected property name or '}'", token.line, token.column)
-            }
 
             // Expect a colon - optimized token handling
             token = lexer.nextToken()
@@ -215,9 +216,6 @@ internal object JSON5Parser {
         return result
     }
 
-    /**
-     * Optimized array parsing with efficient list allocation.
-     */
     /**
      * Highly optimized array parsing with reduced allocations and faster token processing.
      * Performance improvements:

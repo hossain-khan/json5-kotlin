@@ -1,7 +1,5 @@
 package dev.hossain.json5kt
 
-import kotlin.math.pow
-
 /**
  * Lexer for JSON5 syntax
  * Breaks JSON5 text into tokens for the parser
@@ -297,7 +295,7 @@ class JSON5Lexer(
     /**
      * Optimized string reading with pre-sized buffer and efficient escape handling.
      * Performance improvements:
-     * - Pre-sized StringBuilder to reduce allocations  
+     * - Pre-sized StringBuilder to reduce allocations
      * - Fast path for strings without escapes (but maintains position tracking accuracy)
      * - Optimized escape sequence processing
      */
@@ -661,7 +659,7 @@ class JSON5Lexer(
         // Handle decimal notation - optimized with pre-sizing
         // Estimate capacity based on typical number lengths (reduces allocations)
         val buffer = StringBuilder(16)
-        
+
         if (isNegative) {
             buffer.append('-')
         }
@@ -735,7 +733,7 @@ class JSON5Lexer(
     private fun parseHexToDouble(hexStr: String): Double {
         // Fast path for empty/invalid input
         if (hexStr.isEmpty()) return 0.0
-        
+
         // Fast path for small hex numbers (most common case)
         // Can represent up to 15 hex digits precisely in a Long
         if (hexStr.length <= 15) {
@@ -752,7 +750,7 @@ class JSON5Lexer(
             var result = 0.0
             val len = hexStr.length
             var power = 1.0
-            
+
             // Process from right to left in 8-digit chunks to minimize allocations
             var end = len
             while (end > 0) {
@@ -762,7 +760,7 @@ class JSON5Lexer(
                 power *= 4294967296.0 // 16^8 as constant (0x100000000)
                 end = start
             }
-            
+
             return result
         } catch (e: NumberFormatException) {
             // Fallback for very large numbers - simplified approach
@@ -779,7 +777,7 @@ class JSON5Lexer(
      */
     private fun readIdentifier(): Token {
         val startColumn = column
-        
+
         // Pre-size buffer for typical identifier length
         val buffer = StringBuilder(16)
 
@@ -806,7 +804,7 @@ class JSON5Lexer(
                 }
 
                 advance() // Skip 'u'
-                
+
                 // Read 4 hex digits directly without StringBuilder for better performance
                 var hexValue = 0
                 repeat(4) {
@@ -832,7 +830,7 @@ class JSON5Lexer(
         }
 
         val ident = buffer.toString()
-        
+
         // Fast literal matching using when expression (more efficient than multiple if conditions)
         return when (ident) {
             "true" -> Token.BooleanToken(true, line, startColumn)

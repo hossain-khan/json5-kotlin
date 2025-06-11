@@ -180,19 +180,21 @@ internal object JSON5Serializer {
                 val propValue = serializeValue(value, newIndent)
 
                 // Build property string more efficiently
-                val property = if (gap.isNotEmpty()) {
-                    "$linePrefix$propName$colonSeparator$propValue"
-                } else {
-                    "$propName$colonSeparator$propValue"
-                }
+                val property =
+                    if (gap.isNotEmpty()) {
+                        "$linePrefix$propName$colonSeparator$propValue"
+                    } else {
+                        "$propName$colonSeparator$propValue"
+                    }
                 properties.add(property)
             }
 
-            val joined = if (gap.isNotEmpty()) {
-                properties.joinToString(",\n")
-            } else {
-                properties.joinToString(",")
-            }
+            val joined =
+                if (gap.isNotEmpty()) {
+                    properties.joinToString(",\n")
+                } else {
+                    properties.joinToString(",")
+                }
 
             stack.removeAt(stack.size - 1)
 
