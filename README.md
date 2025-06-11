@@ -108,11 +108,6 @@ val json5String = JSON5.stringify(data)
 If you were previously using the deprecated `parseToAny` method, here's how to migrate:
 
 ```kotlin
-// Old API (deprecated and removed)
-// val result = JSON5.parseToAny("""{"key": "value"}""")
-// val map = result as Map<String, Any?>
-
-// New API - Type-safe approach (recommended)
 val result = JSON5.parse("""{"key": "value"}""")
 when (result) {
     is JSON5Value.Object -> {
@@ -252,6 +247,7 @@ This project uses [Gradle](https://gradle.org/) with Java 21:
 ./gradlew build    # Build the library
 ./gradlew test     # Run tests
 ./gradlew check    # Run all checks including tests
+./gradlew :benchmark:run # Runs the benchmark
 ```
 
 ## License
