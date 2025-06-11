@@ -103,42 +103,6 @@ val json5String = JSON5.stringify(data)
 // Returns: {name:'MyApp',version:2,enabled:true}
 ```
 
-### Migration from parseToAny (Deprecated)
-
-If you were previously using the deprecated `parseToAny` method, here's how to migrate:
-
-```kotlin
-val result = JSON5.parse("""{"key": "value"}""")
-when (result) {
-    is JSON5Value.Object -> {
-        val key = result.value["key"] as? JSON5Value.String
-        println(key?.value) // "value"
-    }
-}
-
-// Alternative: Convert to raw objects when needed
-fun JSON5Value.toRawObject(): Any? {
-    return when (this) {
-        is JSON5Value.Null -> null
-        is JSON5Value.Boolean -> this.value
-        is JSON5Value.String -> this.value
-        is JSON5Value.Number.Integer -> this.value.toDouble()
-        is JSON5Value.Number.Decimal -> this.value
-        is JSON5Value.Number.Hexadecimal -> this.value.toDouble()
-        is JSON5Value.Number.PositiveInfinity -> Double.POSITIVE_INFINITY
-        is JSON5Value.Number.NegativeInfinity -> Double.NEGATIVE_INFINITY
-        is JSON5Value.Number.NaN -> Double.NaN
-        is JSON5Value.Object -> this.value.mapValues { it.value.toRawObject() }
-        is JSON5Value.Array -> this.value.map { it.toRawObject() }
-    }
-}
-
-// Using the helper for compatibility
-val rawResult = JSON5.parse("""{"key": "value"}""").toRawObject()
-val map = rawResult as Map<String, Any?>
-println(map["key"]) // "value"
-```
-
 ### Integration with kotlinx.serialization
 
 ```kotlin
