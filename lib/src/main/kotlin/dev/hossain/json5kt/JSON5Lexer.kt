@@ -1,7 +1,5 @@
 package dev.hossain.json5kt
 
-import kotlin.math.pow
-
 /**
  * Lexer for JSON5 syntax
  * Breaks JSON5 text into tokens for the parser
@@ -70,59 +68,82 @@ class JSON5Lexer(
                 } else if (currentChar == '+') {
                     if (peek() == 'I') {
                         // Handle +Infinity
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-                            repeat(8) { advance() }
-                            return Token.NumericToken(Double.POSITIVE_INFINITY, line, startColumn)
+                        val plusSign = currentChar // Should be '+'
+                        val lineAtSign = line
+                        val columnAtSign = column
+                        val posAtSign = pos
+                        advance() // Consume '+'
+
+                        val keyword = "Infinity"
+                        val keywordLength = 8
+                        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+                            val charAfterKeywordPos = pos + keywordLength
+                            val isEndOfSource = charAfterKeywordPos == source.length
+                            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+                            if (!isFollowedByIdentifierPart) {
+                                repeat(keywordLength) { advance() } // Consume "Infinity"
+                                return Token.NumericToken(Double.POSITIVE_INFINITY, lineAtSign, columnAtSign)
+                            }
                         }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
-                        }
-                        currentChar = sign
+                        // If not a valid +Infinity, revert to state before '+' and let readNumber handle it (or fail)
+                        this.pos = posAtSign
+                        this.line = lineAtSign
+                        this.column = columnAtSign
+                        this.currentChar = plusSign
                     }
                     return readNumber()
                 } else if (currentChar == '-') {
-                    if (peek() == 'I') {
-                        // Handle -Infinity
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-                            repeat(8) { advance() }
-                            return Token.NumericToken(Double.NEGATIVE_INFINITY, line, startColumn)
+                    // Handle -Infinity and -NaN
+                    val minusSign = currentChar // Should be '-'
+                    val lineAtSign = line
+                    val columnAtSign = column
+                    val posAtSign = pos
+
+                    val nextCharPeek = peek()
+
+                    if (nextCharPeek == 'I') {
+                        advance() // Consume '-'
+                        val keyword = "Infinity"
+                        val keywordLength = 8
+                        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+                            val charAfterKeywordPos = pos + keywordLength
+                            val isEndOfSource = charAfterKeywordPos == source.length
+                            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+                            if (!isFollowedByIdentifierPart) {
+                                repeat(keywordLength) { advance() } // Consume "Infinity"
+                                return Token.NumericToken(Double.NEGATIVE_INFINITY, lineAtSign, columnAtSign)
+                            }
                         }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
+                        // If not a valid -Infinity, revert to state before '-'
+                        this.pos = posAtSign
+                        this.line = lineAtSign
+                        this.column = columnAtSign
+                        this.currentChar = minusSign
+                        // Fall through to readNumber
+                    } else if (nextCharPeek == 'N') {
+                        advance() // Consume '-'
+                        val keyword = "NaN"
+                        val keywordLength = 3
+                        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+                            val charAfterKeywordPos = pos + keywordLength
+                            val isEndOfSource = charAfterKeywordPos == source.length
+                            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+                            if (!isFollowedByIdentifierPart) {
+                                repeat(keywordLength) { advance() } // Consume "NaN"
+                                return Token.NumericToken(Double.NaN, lineAtSign, columnAtSign)
+                            }
                         }
-                        currentChar = sign
-                    } else if (peek() == 'N') {
-                        // Handle -NaN
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 3, source.length)) == "NaN") {
-                            repeat(3) { advance() }
-                            return Token.NumericToken(Double.NaN, line, startColumn) // NaN is NaN regardless of sign
-                        }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
-                        }
-                        currentChar = sign
+                        // If not a valid -NaN, revert to state before '-'
+                        this.pos = posAtSign
+                        this.line = lineAtSign
+                        this.column = columnAtSign
+                        this.currentChar = minusSign
+                        // Fall through to readNumber
                     }
+                    // If not -Infinity or -NaN, it's potentially a regular negative number or an error
                     return readNumber()
                 } else if (currentChar in '0'..'9' || currentChar == '.') {
                     return readNumber()
@@ -440,163 +461,187 @@ class JSON5Lexer(
     }
 
     private fun readNull(): Token {
-        val startColumn = column
         val startLine = line
+        val startColumn = column
+        val keyword = "null"
+        val keywordLength = 4
 
-        // Check each character of "null" individually
-        if (currentChar != 'n') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+            val charAfterKeywordPos = pos + keywordLength
+            val isEndOfSource = charAfterKeywordPos == source.length
+            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+            if (!isFollowedByIdentifierPart) {
+                repeat(keywordLength) { advance() }
+                return Token.NullToken(startLine, startColumn)
+            } else {
+                // Keyword is followed by an identifier part, making it invalid.
+                // Report the character that violates the rule.
+                // Temporarily advance to get correct line/column for the offending char.
+                var tempLine = line
+                var tempColumn = column
+                var tempPos = pos
+                repeat(keywordLength) {
+                    // Simulate advancing past the keyword
+                    tempPos++
+                    if (tempPos < source.length) {
+                        if (source[tempPos - 1] == '\n') { // check char before advancing for newline
+                            tempLine++
+                            tempColumn = 1
+                        } else {
+                            tempColumn++
+                        }
+                    }
+                }
+                throw JSON5Exception.invalidChar(source[charAfterKeywordPos], tempLine, tempColumn)
+            }
         }
-        advance()
 
-        if (currentChar != 'u') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'l') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'l') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        return Token.NullToken(startLine, startColumn)
+        // If we reach here, it's not "null" as a standalone keyword.
+        // currentChar should still be at the position where the match failed or started.
+        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
     }
 
     private fun readTrue(): Token {
-        val startColumn = column
         val startLine = line
+        val startColumn = column
+        val keyword = "true"
+        val keywordLength = 4
 
-        // Check each character of "true" individually
-        if (currentChar != 't') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+            val charAfterKeywordPos = pos + keywordLength
+            val isEndOfSource = charAfterKeywordPos == source.length
+            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+            if (!isFollowedByIdentifierPart) {
+                repeat(keywordLength) { advance() }
+                return Token.BooleanToken(true, startLine, startColumn)
+            } else {
+                var tempLine = line
+                var tempColumn = column
+                var tempPos = pos
+                repeat(keywordLength) {
+                    tempPos++
+                    if (tempPos < source.length) {
+                        if (source[tempPos - 1] == '\n') {
+                            tempLine++
+                            tempColumn = 1
+                        } else {
+                            tempColumn++
+                        }
+                    }
+                }
+                throw JSON5Exception.invalidChar(source[charAfterKeywordPos], tempLine, tempColumn)
+            }
         }
-        advance()
-
-        if (currentChar != 'r') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'u') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'e') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        return Token.BooleanToken(true, startLine, startColumn)
+        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
     }
 
     private fun readFalse(): Token {
-        val startColumn = column
         val startLine = line
+        val startColumn = column
+        val keyword = "false"
+        val keywordLength = 5
 
-        // Check each character of "false" individually
-        if (currentChar != 'f') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+            val charAfterKeywordPos = pos + keywordLength
+            val isEndOfSource = charAfterKeywordPos == source.length
+            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+            if (!isFollowedByIdentifierPart) {
+                repeat(keywordLength) { advance() }
+                return Token.BooleanToken(false, startLine, startColumn)
+            } else {
+                var tempLine = line
+                var tempColumn = column
+                var tempPos = pos
+                repeat(keywordLength) {
+                    tempPos++
+                    if (tempPos < source.length) {
+                        if (source[tempPos - 1] == '\n') {
+                            tempLine++
+                            tempColumn = 1
+                        } else {
+                            tempColumn++
+                        }
+                    }
+                }
+                throw JSON5Exception.invalidChar(source[charAfterKeywordPos], tempLine, tempColumn)
+            }
         }
-        advance()
-
-        if (currentChar != 'a') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'l') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 's') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'e') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        return Token.BooleanToken(false, startLine, startColumn)
+        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
     }
 
     private fun readInfinity(): Token {
-        val startColumn = column
         val startLine = line
+        val startColumn = column
+        val keyword = "Infinity"
+        val keywordLength = 8
 
-        // Check each character of "Infinity" individually
-        if (currentChar != 'I') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+            val charAfterKeywordPos = pos + keywordLength
+            val isEndOfSource = charAfterKeywordPos == source.length
+            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+            if (!isFollowedByIdentifierPart) {
+                repeat(keywordLength) { advance() }
+                return Token.NumericToken(Double.POSITIVE_INFINITY, startLine, startColumn)
+            } else {
+                var tempLine = line
+                var tempColumn = column
+                var tempPos = pos
+                repeat(keywordLength) {
+                    tempPos++
+                    if (tempPos < source.length) {
+                        if (source[tempPos - 1] == '\n') {
+                            tempLine++
+                            tempColumn = 1
+                        } else {
+                            tempColumn++
+                        }
+                    }
+                }
+                throw JSON5Exception.invalidChar(source[charAfterKeywordPos], tempLine, tempColumn)
+            }
         }
-        advance()
-
-        if (currentChar != 'n') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'f') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'i') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'n') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'i') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 't') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'y') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        return Token.NumericToken(Double.POSITIVE_INFINITY, startLine, startColumn)
+        // This part of the original code was complex, attempting to match char-by-char.
+        // The new logic is more direct. If it's not "Infinity" cleanly, throw based on current char.
+        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
     }
 
     private fun readNaN(): Token {
-        val startColumn = column
         val startLine = line
+        val startColumn = column
+        val keyword = "NaN"
+        val keywordLength = 3
 
-        // Check each character of "NaN" individually
-        if (currentChar != 'N') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+        if (pos + keywordLength <= source.length && source.startsWith(keyword, pos)) {
+            val charAfterKeywordPos = pos + keywordLength
+            val isEndOfSource = charAfterKeywordPos == source.length
+            val isFollowedByIdentifierPart = !isEndOfSource && isIdentifierPart(source[charAfterKeywordPos])
+
+            if (!isFollowedByIdentifierPart) {
+                repeat(keywordLength) { advance() }
+                return Token.NumericToken(Double.NaN, startLine, startColumn)
+            } else {
+                var tempLine = line
+                var tempColumn = column
+                var tempPos = pos
+                repeat(keywordLength) {
+                    tempPos++
+                    if (tempPos < source.length) {
+                        if (source[tempPos - 1] == '\n') {
+                            tempLine++
+                            tempColumn = 1
+                        } else {
+                            tempColumn++
+                        }
+                    }
+                }
+                throw JSON5Exception.invalidChar(source[charAfterKeywordPos], tempLine, tempColumn)
+            }
         }
-        advance()
-
-        if (currentChar != 'a') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        if (currentChar != 'N') {
-            throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
-        }
-        advance()
-
-        return Token.NumericToken(Double.NaN, startLine, startColumn)
+        throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
     }
 
     private fun readNumber(): Token.NumericToken {
@@ -640,17 +685,17 @@ class JSON5Lexer(
             }
 
             try {
-                // Parse the hex number manually instead of using toDouble()
-                val hexStr = buffer.toString()
-                val value =
-                    if (isNegative) {
-                        -parseHexToDouble(hexStr.substring(3)) // skip "-0x"
-                    } else {
-                        parseHexToDouble(hexStr.substring(2)) // skip "0x"
-                    }
-                return Token.NumericToken(value, startLine, startColumn)
+                val fullHexStr = buffer.toString()
+                val hexValueStr = if (isNegative) fullHexStr.substring(3) else fullHexStr.substring(2)
+
+                if (hexValueStr.isEmpty()) {
+                    throw JSON5Exception.invalidChar(currentChar ?: ' ', line, column)
+                }
+
+                val value = parseHexToDouble(hexValueStr)
+                return Token.NumericToken(if (isNegative) -value else value, startLine, startColumn)
             } catch (e: NumberFormatException) {
-                throw JSON5Exception("Invalid hexadecimal number", line, column)
+                throw JSON5Exception("Invalid hexadecimal number: ${e.message}", line, column)
             }
         }
 
@@ -727,43 +772,11 @@ class JSON5Lexer(
     }
 
     private fun parseHexToDouble(hexStr: String): Double {
-        // For hexadecimal numbers, we need to replicate JavaScript's behavior
-        try {
-            // For small numbers that can be represented as a Long, this approach is precise
-            if (hexStr.length <= 15) {
-                return hexStr.toLong(16).toDouble()
-            }
-
-            // For larger numbers, we need to handle them specially
-            // JavaScript converts large hex numbers to double precision which can lose precision
-            // We'll calculate this by breaking down into chunks
-
-            var result = 0.0
-            var power = 1.0
-
-            // Process 8 digits at a time from right to left
-            var remaining = hexStr
-            while (remaining.isNotEmpty()) {
-                val chunk = remaining.takeLast(8) // Take up to 8 digits
-                remaining = remaining.dropLast(chunk.length)
-
-                val chunkValue = chunk.toLongOrNull(16) ?: 0
-                result += chunkValue * power
-                power *= 16.0.pow(8) // Move to next 8-digit chunk
-            }
-
-            return result
-        } catch (e: NumberFormatException) {
-            // If it's too big for Long, use JavaScript's approach: convert to number and it might lose precision
-            // This is the behavior in the reference implementation
-            val jsChunks = hexStr.chunked(12) // Process in chunks JavaScript can handle
-            var result = 0.0
-            for (i in jsChunks.indices) {
-                val chunk = jsChunks[i]
-                result += chunk.toULong(16).toDouble() * 16.0.pow((jsChunks.size - 1 - i) * 12)
-            }
-            return result
-        }
+        // Use java.math.BigInteger to parse the hex string and then convert to Double.
+        // This handles arbitrarily large hexadecimal integers and converts them to Double,
+        // mimicking JavaScript's behavior for large number precision.
+        // NumberFormatException will be thrown by BigInteger if hexStr is not a valid hex number.
+        return java.math.BigInteger(hexStr, 16).toDouble()
     }
 
     private fun readIdentifier(): Token {
