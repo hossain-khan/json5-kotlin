@@ -32,7 +32,7 @@ class JSON5Lexer(
     fun nextToken(): Token {
         skipWhitespace()
         skipComments()
-        // Fix: skip whitespace and comments in a loop before every token
+        // Skip whitespace and comments in a loop before every token
         while (true) {
             val before = pos
             skipWhitespace()
@@ -51,7 +51,6 @@ class JSON5Lexer(
                 token
             }
             '"', '\'' -> readString()
-            // Fix: Only treat 'n', 't', 'f', 'I', 'N' as keywords if they match the full identifier
             else -> {
                 if (isIdentifierStart(currentChar)) {
                     return readIdentifier()

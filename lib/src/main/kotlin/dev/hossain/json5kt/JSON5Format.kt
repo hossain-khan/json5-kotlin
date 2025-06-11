@@ -34,7 +34,7 @@ class JSON5Format(
     override val serializersModule: SerializersModule = EmptySerializersModule()
 
     /**
-     * Encodes the given [value] to JSON5 string using the serializer retrieved from reified type parameter.
+     * Encodes the given [value] to JSON5 string using the provided serializer.
      */
     override fun <T> encodeToString(
         serializer: SerializationStrategy<T>,
