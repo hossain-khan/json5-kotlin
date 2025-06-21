@@ -1,5 +1,9 @@
 package dev.hossain.json5kt
 
+private val TRUNCATED_TRUE_LITERALS = setOf("t", "tr", "tru")
+private val TRUNCATED_FALSE_LITERALS = setOf("f", "fa", "fal", "fals")
+private val TRUNCATED_NULL_LITERALS = setOf("n", "nu", "nul")
+
 /**
  * Lexer for JSON5 syntax
  * Breaks JSON5 text into tokens for the parser
@@ -65,62 +69,61 @@ class JSON5Lexer(
                 } else if (currentChar == 'N') {
                     return readNaN()
                 } else if (currentChar == '+') {
-                    if (peek() == 'I') {
-                        // Handle +Infinity
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-                            repeat(8) { advance() }
-                            return Token.NumericToken(Double.POSITIVE_INFINITY, line, startColumn)
-                        }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
-                        }
-                        currentChar = sign
+                    // Current char is '+'
+                    val startLine = line
+                    val startColumn = column
+
+                    // Peek ahead for "Infinity"
+                    if (
+                        source.getOrNull(pos + 1) == 'I' &&
+                        source.getOrNull(pos + 2) == 'n' &&
+                        source.getOrNull(pos + 3) == 'f' &&
+                        source.getOrNull(pos + 4) == 'i' &&
+                        source.getOrNull(pos + 5) == 'n' &&
+                        source.getOrNull(pos + 6) == 'i' &&
+                        source.getOrNull(pos + 7) == 't' &&
+                        source.getOrNull(pos + 8) == 'y' &&
+                        (pos + 9 >= source.length || !isIdentifierPart(source.getOrNull(pos + 9)))
+                    ) {
+                        advance() // Consume '+'
+                        repeat(8) { advance() } // Consume "Infinity"
+                        return Token.NumericToken(Double.POSITIVE_INFINITY, startLine, startColumn)
                     }
-                    return readNumber()
+                    // If not "+Infinity", let readNumber handle it (it expects current char to be '+')
+                    return readNumber() // readNumber will process the '+'
                 } else if (currentChar == '-') {
-                    if (peek() == 'I') {
-                        // Handle -Infinity
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 8, source.length)) == "Infinity") {
-                            repeat(8) { advance() }
-                            return Token.NumericToken(Double.NEGATIVE_INFINITY, line, startColumn)
-                        }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
-                        }
-                        currentChar = sign
-                    } else if (peek() == 'N') {
-                        // Handle -NaN
-                        val sign = currentChar
-                        val startColumn = column
-                        advance()
-                        if (source.substring(pos, minOf(pos + 3, source.length)) == "NaN") {
-                            repeat(3) { advance() }
-                            return Token.NumericToken(Double.NaN, line, startColumn) // NaN is NaN regardless of sign
-                        }
-                        pos -= 1
-                        if (currentChar == '\n') {
-                            line -= 1
-                            column = 1
-                        } else {
-                            column -= 1
-                        }
-                        currentChar = sign
+                    // val sign = currentChar // Should be '-' // Not needed with peeking
+                    val startLine = line
+                    val startColumn = column
+
+                    // Peek ahead for "Infinity"
+                    if (
+                        source.getOrNull(pos + 1) == 'I' &&
+                        source.getOrNull(pos + 2) == 'n' &&
+                        source.getOrNull(pos + 3) == 'f' &&
+                        source.getOrNull(pos + 4) == 'i' &&
+                        source.getOrNull(pos + 5) == 'n' &&
+                        source.getOrNull(pos + 6) == 'i' &&
+                        source.getOrNull(pos + 7) == 't' &&
+                        source.getOrNull(pos + 8) == 'y' &&
+                        (pos + 9 >= source.length || !isIdentifierPart(source.getOrNull(pos + 9)))
+                    ) {
+                        advance() // Consume '-'
+                        repeat(8) { advance() } // Consume "Infinity"
+                        return Token.NumericToken(Double.NEGATIVE_INFINITY, startLine, startColumn)
+                    } else if (
+                        source.getOrNull(pos + 1) == 'N' &&
+                        source.getOrNull(pos + 2) == 'a' &&
+                        source.getOrNull(pos + 3) == 'N' &&
+                        (pos + 4 >= source.length || !isIdentifierPart(source.getOrNull(pos + 4)))
+                    ) {
+                        advance() // Consume '-'
+                        repeat(3) { advance() } // Consume "NaN"
+                        return Token.NumericToken(Double.NaN, startLine, startColumn) // -NaN is just NaN
                     }
-                    return readNumber()
+                    // If not "-Infinity" or "-NaN", let readNumber handle it
+                    // No need to backtrack as readNumber will consume the current '-'
+                    return readNumber() // readNumber will process the '-'
                 } else if (currentChar in '0'..'9' || currentChar == '.') {
                     return readNumber()
                 } else if (currentChar == '\\') {
@@ -840,11 +843,11 @@ class JSON5Lexer(
             "NaN" -> Token.NumericToken(Double.NaN, line, startColumn)
             else -> {
                 // Check for malformed literals more efficiently
-                if (currentChar != null) {
+                if (currentChar != null) { // If there's a next char that prevented full literal match
                     when {
-                        ident in arrayOf("t", "tr", "tru") -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
-                        ident in arrayOf("f", "fa", "fal", "fals") -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
-                        ident in arrayOf("n", "nu", "nul") -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                        ident in TRUNCATED_TRUE_LITERALS -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                        ident in TRUNCATED_FALSE_LITERALS -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
+                        ident in TRUNCATED_NULL_LITERALS -> throw JSON5Exception.invalidChar(currentChar!!, line, column)
                     }
                 }
                 Token.IdentifierToken(ident, line, startColumn)
@@ -868,4 +871,69 @@ class JSON5Lexer(
     }
 
     private fun Char.isHexDigit(): Boolean = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
+
+    /**
+     * Tries to match the [keyword] (like "Infinity" or "NaN") at the current lexer position.
+     * If matched, consumes the keyword and returns true.
+     * If not matched, resets the lexer position to where it was before calling this method and returns false.
+     * Assumes the first character of the keyword is already peeked or implicitly matched.
+     * The caller should `advance()` for the first character before calling this if it's part of the keyword (e.g. 'I' in Infinity).
+     */
+    private fun matchAndConsumeKeyword(keyword: String): Boolean {
+        val initialPos = pos
+        val initialLine = line
+        val initialColumn = column
+        val initialChar = currentChar
+
+        // `keyword` here is the rest of the string, e.g., "nfinity" for "Infinity" if 'I' was already consumed.
+        // Or, if the first char of keyword is what currentChar is, then keyword[0] should match currentChar.
+        // For simplicity, let's assume keyword is what we expect to see starting from currentChar.
+
+        for (i in keyword.indices) {
+            if (currentChar != keyword[i]) {
+                // No match, backtrack
+                pos = initialPos
+                line = initialLine
+                column = initialColumn
+                currentChar = initialChar
+                return false
+            }
+            if (i < keyword.length - 1) { // Don't advance past the last char of the keyword yet
+                advance()
+            }
+        }
+
+        // After matching the keyword, check if it's followed by an identifier part.
+        // This is important because "InfinityX" should not be tokenized as "Infinity" then "X".
+        // It should be an identifier "InfinityX".
+        // However, JSON5 spec for Infinity/NaN is that they are literals, not identifiers that can be extended.
+        // "If the DPMChar sequence is "Infinity", the DPM value is +∞."
+        // "If the DPMChar sequence is "NaN", the DPM value is NaN."
+        // This implies they should be recognized even if followed by something that could be an identifier part,
+        // and the parser would later fail if it's not a valid end.
+        // The original code implicitly handled this by `readIdentifier` being separate.
+        // For now, let's stick to exact match. The `advance()` for the last char will happen outside or by caller.
+
+        // Let's refine: this function should consume the full keyword *including* advancing past the last char.
+        // The caller expects to be positioned *after* the keyword if true is returned.
+
+        // Re-do with full consumption:
+        pos = initialPos
+        line = initialLine
+        column = initialColumn
+        currentChar = initialChar
+
+        for (charInKeyword in keyword) {
+            if (currentChar != charInKeyword) {
+                // No match, backtrack
+                pos = initialPos
+                line = initialLine
+                column = initialColumn
+                currentChar = initialChar
+                return false
+            }
+            advance()
+        }
+        return true
+    }
 }
