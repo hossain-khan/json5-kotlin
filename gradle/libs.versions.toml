@@ -42,3 +42,4 @@ kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kotlinxKover" }
 # https://github.com/jeremymailen/kotlinter-gradle
 # https://github.com/pinterest/ktlint
 kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
+foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version = "0.8.0" }
