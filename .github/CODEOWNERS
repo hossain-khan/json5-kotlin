@@ -1,0 +1,17 @@
+# Global code owners
+* @hossain-khan
+
+# Core library code
+/lib/ @hossain-khan
+
+# Build and CI configuration  
+/buildSrc/ @hossain-khan
+/.github/workflows/ @hossain-khan
+/gradle/ @hossain-khan
+*.gradle.kts @hossain-khan
+
+# Documentation
+/README.md @hossain-khan
+/CONTRIBUTING.md @hossain-khan
+/.github/copilot-instructions.md @hossain-khan
+/.github/DEVELOPMENT.md @hossain-khan

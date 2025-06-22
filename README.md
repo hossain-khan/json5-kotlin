@@ -249,6 +249,17 @@ This project uses [Gradle](https://gradle.org/) with Java 21:
 ./gradlew :benchmark:run # Runs the benchmark
 ```
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up your development environment
+- Code style and standards  
+- Testing requirements
+- Submitting pull requests
+
+For detailed development information, see [Development Guide](.github/DEVELOPMENT.md).
+
 ## License
 
 This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
