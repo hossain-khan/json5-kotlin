@@ -1,0 +1,84 @@
+name: Bug Report
+description: Report a bug or issue with json5-kotlin
+title: "[Bug]: "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please provide as much detail as possible to help us fix the issue quickly.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the library is affected?
+      options:
+        - JSON5 Parser
+        - JSON5 Serializer  
+        - kotlinx.serialization integration
+        - Error handling
+        - Performance
+        - Documentation
+        - Build/CI
+        - Other
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Clearly describe the bug and what you expected to happen
+      placeholder: |
+        Describe what happened and what you expected to happen...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide specific steps to reproduce the issue
+      placeholder: |
+        1. Create JSON5 with...
+        2. Call JSON5.parseToJsonElement(...)
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Code Sample
+      description: Provide a minimal code example that demonstrates the issue
+      render: kotlin
+      placeholder: |
+        val json5 = """
+        {
+            // Your JSON5 content here
+        }
+        """
+        val result = JSON5.parseToJsonElement(json5)
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Your development environment details
+      value: |
+        - json5-kotlin version:
+        - Kotlin version:
+        - kotlinx.serialization version:
+        - JVM version:
+        - OS:
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem (error messages, logs, etc.)

@@ -1,0 +1,83 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for json5-kotlin
+title: "[Feature]: "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide as much detail as possible about your idea.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the library would this feature affect?
+      options:
+        - JSON5 Parser
+        - JSON5 Serializer
+        - kotlinx.serialization integration
+        - API design
+        - Performance
+        - Documentation
+        - Build/CI
+        - Other
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What problem does this feature solve? What's the use case?
+      placeholder: |
+        Describe the problem or limitation you're facing...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your preferred solution
+      placeholder: |
+        Describe how you'd like this feature to work...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        Describe any alternative solutions you've considered...
+
+  - type: textarea
+    id: code-example
+    attributes:
+      label: Code Example
+      description: Show how the feature would be used (optional but helpful)
+      render: kotlin
+      placeholder: |
+        // Example of how the feature would be used
+        val config = JSON5.configure {
+            // new feature configuration
+        }
+
+  - type: checkboxes
+    id: breaking-change
+    attributes:
+      label: Breaking Change
+      description: Would this feature require breaking changes to the existing API?
+      options:
+        - label: This feature would require breaking changes
+        - label: This feature maintains backward compatibility
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, links, or examples related to this feature request
