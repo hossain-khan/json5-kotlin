@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Pre-commit hook to automatically format Kotlin code using ktlint
+# This hook runs ./gradlew formatKotlin before each commit.
+# If formatting succeeds and changes are made, they are automatically added to the commit.
+# If formatting fails, the commit is aborted.
+#
+
+echo "Running Kotlin code formatting..."
+
+# Run formatKotlin task
+if ! ./gradlew formatKotlin; then
+    echo "❌ Code formatting failed! Please fix the issues and try again."
+    echo "Run './gradlew formatKotlin' manually to see the errors."
+    exit 1
+fi
+
+# Check if there are any changes after formatting
+if ! git diff --exit-code --quiet; then
+    echo "📝 Code formatting made changes. Adding them to the commit..."
+    git add .
+    echo "✅ Formatted files added to commit."
+else
+    echo "✅ Code is already properly formatted."
+fi
+
+echo "✅ Pre-commit formatting check passed!"
