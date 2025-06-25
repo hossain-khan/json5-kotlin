@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON5 Performance Benchmark - Interactive Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .chart-container {
+            margin: 40px 0;
+            position: relative;
+            height: 400px;
+        }
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #444;
+        }
+        .summary-stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        .summary-stats h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .methodology {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 4px solid #007bff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .libraries {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .library {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        .library.json5 { background: #ffeaa7; }
+        .library.json { background: #81ecec; }
+        .library.external { background: #fab1a0; }
+        .library-name { font-weight: bold; margin-bottom: 5px; }
+        .library-desc { font-size: 0.9em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON5 Performance Benchmark</h1>
+        <p class="subtitle">Interactive Performance Comparison: JSON5 vs JSON vs External-JSON5</p>
+        <p class="subtitle">Generated from benchmark data: June 25, 2025</p>
+        
+        <div class="libraries">
+            <div class="library json5">
+                <div class="library-name">JSON5 (This Project)</div>
+                <div class="library-desc">kotlinx.serialization integration</div>
+            </div>
+            <div class="library json">
+                <div class="library-name">JSON (Standard)</div>
+                <div class="library-desc">kotlinx.serialization baseline</div>
+            </div>
+            <div class="library external">
+                <div class="library-name">External-JSON5</div>
+                <div class="library-desc">at.syntaxerror.json5:2.1.0</div>
+            </div>
+        </div>
+
+        <div class="summary-stats">
+            <h3>Key Performance Insights</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">4.45×</div>
+                    <div class="stat-label">JSON faster than JSON5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2.51×</div>
+                    <div class="stat-label">JSON faster than External-JSON5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1.77×</div>
+                    <div class="stat-label">External-JSON5 faster than JSON5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.149ms</div>
+                    <div class="stat-label">JSON5 average time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.033ms</div>
+                    <div class="stat-label">JSON average time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.084ms</div>
+                    <div class="stat-label">External-JSON5 average time</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Performance by Data Type and Operation</div>
+            <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Serialization vs Deserialization Performance</div>
+            <canvas id="operationChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Overall Performance Comparison (Lower is Better)</div>
+            <canvas id="overallChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Performance Ratios - How Many Times Slower</div>
+            <canvas id="ratioChart"></canvas>
+        </div>
+
+        <div class="methodology">
+            <h3>Methodology</h3>
+            <p><strong>Test Environment:</strong> JVM warmup with 100 iterations, followed by 1000 iterations per test case.</p>
+            <p><strong>Data Types:</strong> SimplePerson, ComplexPerson, Company, NumberTypes, CollectionTypes, SimplePersonList100, ComplexPersonList50</p>
+            <p><strong>Operations:</strong> Serialization (object to JSON string) and Deserialization (JSON string to object)</p>
+            <p><strong>Libraries:</strong></p>
+            <ul>
+                <li><strong>JSON5:</strong> This project's implementation with kotlinx.serialization integration</li>
+                <li><strong>JSON:</strong> Standard kotlinx.serialization JSON implementation (baseline)</li>
+                <li><strong>External-JSON5:</strong> at.syntaxerror.json5:2.1.0 library</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            Generated from benchmark results: benchmark_results_2025-06-25_01-31-43.csv<br>
+            Source: <a href="https://github.com/hossain-khan/json5-kotlin" target="_blank">json5-kotlin</a>
+        </div>
+    </div>
+
+    <script>
+        // Benchmark data from CSV
+        const benchmarkData = [
+            {operation: "Serialization", dataType: "SimplePerson", json5: 0.030744, json: 0.009724, external: 0.011342},
+            {operation: "Deserialization", dataType: "SimplePerson", json5: 0.044855, json: 0.013417, external: 0.016946},
+            {operation: "Serialization", dataType: "ComplexPerson", json5: 0.084276, json: 0.017626, external: 0.032629},
+            {operation: "Deserialization", dataType: "ComplexPerson", json5: 0.093283, json: 0.028409, external: 0.029612},
+            {operation: "Serialization", dataType: "Company", json5: 0.233488, json: 0.055665, external: 0.073242},
+            {operation: "Deserialization", dataType: "Company", json5: 0.24227, json: 0.082065, external: 0.1429},
+            {operation: "Serialization", dataType: "NumberTypes", json5: 0.031356, json: 0.003685, external: 0.007621},
+            {operation: "Deserialization", dataType: "NumberTypes", json5: 0.018881, json: 0.002319, external: 0.008903},
+            {operation: "Serialization", dataType: "CollectionTypes", json5: 0.059759, json: 0.012559, external: 0.011947},
+            {operation: "Deserialization", dataType: "CollectionTypes", json5: 0.055373, json: 0.013326, external: 0.030438},
+            {operation: "Serialization", dataType: "SimplePersonList100", json5: 0.127242, json: 0.025492, external: 0.060501},
+            {operation: "Deserialization", dataType: "SimplePersonList100", json5: 0.193987, json: 0.033556, external: 0.139531},
+            {operation: "Serialization", dataType: "ComplexPersonList50", json5: 0.438785, json: 0.060589, external: 0.15082},
+            {operation: "Deserialization", dataType: "ComplexPersonList50", json5: 0.429654, json: 0.109552, external: 0.459166}
+        ];
+
+        // Chart colors
+        const colors = {
+            json5: '#FFD93D',
+            json: '#4BC0C0',
+            external: '#FF6B35'
+        };
+
+        // Chart 1: Performance by Data Type and Operation
+        const ctx1 = document.getElementById('performanceChart').getContext('2d');
+        const labels = [...new Set(benchmarkData.map(d => `${d.dataType}\n${d.operation}`))];
+        
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'JSON5 (This Project)',
+                        data: benchmarkData.map(d => d.json5),
+                        backgroundColor: colors.json5,
+                        borderColor: colors.json5,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'JSON (Standard)',
+                        data: benchmarkData.map(d => d.json),
+                        backgroundColor: colors.json,
+                        borderColor: colors.json,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'External-JSON5',
+                        data: benchmarkData.map(d => d.external),
+                        backgroundColor: colors.external,
+                        borderColor: colors.external,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Time (milliseconds)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Data Type & Operation'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Serialization vs Deserialization
+        const ctx2 = document.getElementById('operationChart').getContext('2d');
+        const serializationData = benchmarkData.filter(d => d.operation === 'Serialization');
+        const deserializationData = benchmarkData.filter(d => d.operation === 'Deserialization');
+        
+        const avgSerialization = {
+            json5: serializationData.reduce((sum, d) => sum + d.json5, 0) / serializationData.length,
+            json: serializationData.reduce((sum, d) => sum + d.json, 0) / serializationData.length,
+            external: serializationData.reduce((sum, d) => sum + d.external, 0) / serializationData.length
+        };
+        
+        const avgDeserialization = {
+            json5: deserializationData.reduce((sum, d) => sum + d.json5, 0) / deserializationData.length,
+            json: deserializationData.reduce((sum, d) => sum + d.json, 0) / deserializationData.length,
+            external: deserializationData.reduce((sum, d) => sum + d.external, 0) / deserializationData.length
+        };
+
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Serialization', 'Deserialization'],
+                datasets: [
+                    {
+                        label: 'JSON5 (This Project)',
+                        data: [avgSerialization.json5, avgDeserialization.json5],
+                        backgroundColor: colors.json5,
+                        borderColor: colors.json5,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'JSON (Standard)',
+                        data: [avgSerialization.json, avgDeserialization.json],
+                        backgroundColor: colors.json,
+                        borderColor: colors.json,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'External-JSON5',
+                        data: [avgSerialization.external, avgDeserialization.external],
+                        backgroundColor: colors.external,
+                        borderColor: colors.external,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Average Time (milliseconds)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms avg`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Overall Performance Comparison
+        const ctx3 = document.getElementById('overallChart').getContext('2d');
+        const overallAvg = {
+            json5: 0.149,
+            json: 0.033,
+            external: 0.084
+        };
+
+        new Chart(ctx3, {
+            type: 'doughnut',
+            data: {
+                labels: ['JSON5 (This Project)', 'JSON (Standard)', 'External-JSON5'],
+                datasets: [{
+                    data: [overallAvg.json5, overallAvg.json, overallAvg.external],
+                    backgroundColor: [colors.json5, colors.json, colors.external],
+                    borderColor: [colors.json5, colors.json, colors.external],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed.toFixed(3)}ms avg`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: Performance Ratios
+        const ctx4 = document.getElementById('ratioChart').getContext('2d');
+        new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: ['JSON5 vs JSON', 'External-JSON5 vs JSON', 'JSON5 vs External-JSON5'],
+                datasets: [{
+                    label: 'Performance Ratio (times slower)',
+                    data: [4.45, 2.51, 1.77],
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
+                    borderColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Times Slower (ratio)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.parsed.y.toFixed(2)}× slower`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
