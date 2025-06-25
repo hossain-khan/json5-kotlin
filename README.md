@@ -73,7 +73,7 @@ repositories {
 }
 
 dependencies {
-    implementation("hossain.dev:json5kt:1.1.0")
+    implementation("hossain.dev:json5kt:1.2.0") // Or, latest release
 }
 ```
 
