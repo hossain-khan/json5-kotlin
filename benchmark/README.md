@@ -35,6 +35,13 @@ The benchmark generates two types of reports:
 - Shows relative performance comparisons between each pair of libraries
 - Includes overall statistics and rankings
 
+### Interactive Visualization
+- File: `benchmark_visualization.html`
+- Self-contained HTML file with interactive charts using Chart.js
+- Provides visual comparison of performance across all three libraries
+- Includes multiple chart types: bar charts, doughnut charts, and performance ratios
+- Can be opened directly in any web browser
+
 ## Test Data Types
 
 The benchmark tests the following data structures:
@@ -71,25 +78,29 @@ Based on typical runs across the three libraries:
 
 Example output:
 ```
-SimplePerson Serialization: JSON5=0.028ms, JSON=0.010ms, External-JSON5=0.011ms
-ComplexPerson Serialization: JSON5=0.073ms, JSON=0.018ms, External-JSON5=0.018ms  
-Company Serialization: JSON5=0.163ms, JSON=0.031ms, External-JSON5=0.054ms
+SimplePerson Serialization: JSON5=0.031ms, JSON=0.010ms, External-JSON5=0.011ms
+ComplexPerson Serialization: JSON5=0.084ms, JSON=0.018ms, External-JSON5=0.033ms  
+Company Serialization: JSON5=0.233ms, JSON=0.056ms, External-JSON5=0.073ms
 ```
 
 ### Benchmark Result Snapshot
 
 | Case                | Type            | JSON5 (ms) | JSON (ms) | External-JSON5 (ms) | Performance Ranking |
 | ------------------- | --------------- | ---------- | --------- | ------------------- | ------------------- |
-| SimplePerson        | Serialization   | 0.028      | 0.010     | 0.011               | JSON > Ext-JSON5 > JSON5 |
-| SimplePerson        | Deserialization | 0.049      | 0.014     | 0.017               | JSON > Ext-JSON5 > JSON5 |
-| ComplexPerson       | Serialization   | 0.073      | 0.018     | 0.018               | JSON ≈ Ext-JSON5 > JSON5 |
-| ComplexPerson       | Deserialization | 0.101      | 0.021     | 0.020               | Ext-JSON5 > JSON > JSON5 |
-| Company             | Serialization   | 0.163      | 0.031     | 0.054               | JSON > Ext-JSON5 > JSON5 |
-| Company             | Deserialization | 0.200      | 0.081     | 0.117               | JSON > Ext-JSON5 > JSON5 |
+| SimplePerson        | Serialization   | 0.031      | 0.010     | 0.011               | JSON > Ext-JSON5 > JSON5 |
+| SimplePerson        | Deserialization | 0.045      | 0.013     | 0.017               | JSON > Ext-JSON5 > JSON5 |
+| ComplexPerson       | Serialization   | 0.084      | 0.018     | 0.033               | JSON > Ext-JSON5 > JSON5 |
+| ComplexPerson       | Deserialization | 0.093      | 0.028     | 0.030               | JSON > Ext-JSON5 > JSON5 |
+| Company             | Serialization   | 0.233      | 0.056     | 0.073               | JSON > Ext-JSON5 > JSON5 |
+| Company             | Deserialization | 0.242      | 0.082     | 0.143               | JSON > Ext-JSON5 > JSON5 |
+| NumberTypes         | Serialization   | 0.031      | 0.004     | 0.008               | JSON > Ext-JSON5 > JSON5 |
+| NumberTypes         | Deserialization | 0.019      | 0.002     | 0.009               | JSON > Ext-JSON5 > JSON5 |
+| CollectionTypes     | Serialization   | 0.060      | 0.013     | 0.012               | Ext-JSON5 > JSON > JSON5 |
+| CollectionTypes     | Deserialization | 0.055      | 0.013     | 0.030               | JSON > Ext-JSON5 > JSON5 |
 
 **Overall Performance Comparison:**
-- **JSON** is **3.90×** faster than **JSON5** and **2.75×** faster than **External-JSON5**
-- **External-JSON5** is **1.42×** faster than **JSON5**
+- **JSON** is **4.45×** faster than **JSON5** and **2.51×** faster than **External-JSON5**
+- **External-JSON5** is **1.77×** faster than **JSON5**
 
 ## Key Insights
 
