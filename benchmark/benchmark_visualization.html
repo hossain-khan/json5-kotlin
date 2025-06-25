@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>json5-kotlin - JSON5 Implementation for Kotlin/JVM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -98,9 +100,9 @@
             font-size: 1.2em;
         }
         .code-block {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 20px;
+            /* background: #2d3748; */ /* Theme will provide background */
+            /* color: #e2e8f0; */       /* Theme will provide color */
+            padding: 20px; /* This padding will be outside the themed code area */
             border-radius: 8px;
             overflow-x: auto;
             margin: 20px 0;
@@ -289,68 +291,68 @@
                     <h3><span class="icon">💬</span>Comments</h3>
                     <p>Both line comments <code>//</code> and block comments <code>/* */</code> are supported.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   // This is a line comment
   "name": "John", /* block comment */
   "age": 30
-}</pre>
+}</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
                     <h3><span class="icon">🔤</span>Unquoted Keys</h3>
                     <p>Object keys can be unquoted if they're valid identifiers.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   name: "John",
   age: 30,
   isActive: true
-}</pre>
+}</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
                     <h3><span class="icon">✂️</span>Trailing Commas</h3>
                     <p>Trailing commas are allowed in objects and arrays.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   "items": [
     "apple",
     "banana",  // ← trailing comma OK
   ],
-}</pre>
+}</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
                     <h3><span class="icon">📝</span>Single Quotes</h3>
                     <p>Strings can use single quotes in addition to double quotes.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   'name': 'John',
   "age": 30
-}</pre>
+}</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
                     <h3><span class="icon">📏</span>Multi-line Strings</h3>
                     <p>Strings can span multiple lines with backslash at line end.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   "description": "This is a \
 very long string that \
 spans multiple lines"
-}</pre>
+}</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
                     <h3><span class="icon">🔢</span>Extended Numbers</h3>
                     <p>Support for hexadecimal, infinity, NaN, and leading/trailing decimal points.</p>
                     <div class="code-block">
-                        <pre>{
+                        <pre><code class="language-json5">{
   hex: 0xFF,
   leadingDecimal: .5,
   trailingDecimal: 2.,
   infinity: Infinity,
   notANumber: NaN
-}</pre>
+}</code></pre>
                     </div>
                 </div>
             </div>
@@ -363,7 +365,7 @@ spans multiple lines"
             <h3>Installation</h3>
             <p>Add the dependency to your <code>build.gradle.kts</code>:</p>
             <div class="code-block">
-                <pre>repositories {
+                <pre><code class="language-groovy">repositories {
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/hossain-khan/json5-kotlin")
@@ -376,12 +378,12 @@ spans multiple lines"
 
 dependencies {
     implementation("hossain.dev:json5kt:1.2.0") // Or, latest release
-}</pre>
+}</code></pre>
             </div>
 
             <h3>Basic Usage</h3>
             <div class="code-block">
-                <pre>import dev.hossain.json5kt.JSON5
+                <pre><code class="language-kotlin">import dev.hossain.json5kt.JSON5
 
 // Parse JSON5 string
 val json5String = """
@@ -396,19 +398,19 @@ val json5String = """
 }
 """
 
-val user = JSON5.decodeFromString&lt;User&gt;(json5String)
+val user = JSON5.decodeFromString<User>(json5String)
 
 // Serialize to JSON5
-val json5Output = JSON5.encodeToString(user)</pre>
+val json5Output = JSON5.encodeToString(user)</code></pre>
             </div>
 
             <h3>Integration with kotlinx.serialization</h3>
             <div class="code-block">
-                <pre>@Serializable
+                <pre><code class="language-kotlin">@Serializable
 data class User(
     val name: String,
     val age: Int,
-    val skills: List&lt;String&gt;
+    val skills: List<String>
 )
 
 // Configure JSON5 with custom settings
@@ -417,7 +419,7 @@ val json5 = JSON5 {
     ignoreUnknownKeys = true
 }
 
-val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
+val user = json5.decodeFromString<User>(json5String)</code></pre>
             </div>
 
             <div class="cta-section">
@@ -794,6 +796,8 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
         document.addEventListener('DOMContentLoaded', function() {
             // Default to overview tab
             showTab('overview');
+            // Initialize Highlight.js
+            hljs.highlightAll();
         });
     </script>
 </body>
