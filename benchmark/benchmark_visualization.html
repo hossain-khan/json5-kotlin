@@ -3,28 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON5 Performance Benchmark - Interactive Visualization</title>
+    <title>json5-kotlin - JSON5 Implementation for Kotlin/JVM</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 3em;
+            font-weight: 300;
+        }
+        .header .tagline {
+            font-size: 1.2em;
+            margin: 20px 0;
+            opacity: 0.9;
+        }
+        .header .badges {
+            margin: 30px 0;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
+            padding: 40px;
+            margin-top: -30px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tab:hover, .nav-tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            padding: 25px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .feature-card h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .feature-card .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .code-block pre {
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: #667eea;
         }
         h1 {
             color: #333;
             text-align: center;
             margin-bottom: 10px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
         }
         .subtitle {
             text-align: center;
@@ -111,334 +228,572 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>json5-kotlin</h1>
+        <div class="tagline">JSON5 Implementation for Kotlin/JVM</div>
+        <div class="badges">
+            <span class="badge">✨ JSON5 Support</span>
+            <span class="badge">🔧 kotlinx.serialization</span>
+            <span class="badge">⚡ High Performance</span>
+            <span class="badge">🛡️ Type Safe</span>
+        </div>
+    </div>
+
     <div class="container">
-        <h1>JSON5 Performance Benchmark</h1>
-        <p class="subtitle">Interactive Performance Comparison: JSON5 vs JSON vs External-JSON5</p>
-        <p class="subtitle">Generated from benchmark data: June 25, 2025</p>
-        
-        <div class="libraries">
-            <div class="library json5">
-                <div class="library-name">JSON5 (This Project)</div>
-                <div class="library-desc">kotlinx.serialization integration</div>
-            </div>
-            <div class="library json">
-                <div class="library-name">JSON (Standard)</div>
-                <div class="library-desc">kotlinx.serialization baseline</div>
-            </div>
-            <div class="library external">
-                <div class="library-name">External-JSON5</div>
-                <div class="library-desc">at.syntaxerror.json5:2.1.0</div>
-            </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
+            <div class="nav-tab" onclick="showTab('features')">Features</div>
+            <div class="nav-tab" onclick="showTab('quickstart')">Quick Start</div>
+            <div class="nav-tab" onclick="showTab('benchmarks')">Benchmarks</div>
         </div>
 
-        <div class="summary-stats">
-            <h3>Key Performance Insights</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">4.45×</div>
-                    <div class="stat-label">JSON faster than JSON5</div>
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <h2>About json5-kotlin</h2>
+            <p>A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful features like comments, trailing commas, and unquoted keys while maintaining full backward compatibility with JSON.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3><span class="icon">🚀</span>Modern Architecture</h3>
+                    <p>Built with kotlinx.serialization for seamless integration with Kotlin projects and type-safe serialization.</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">2.51×</div>
-                    <div class="stat-label">JSON faster than External-JSON5</div>
+                <div class="feature-card">
+                    <h3><span class="icon">🔄</span>Full Compatibility</h3>
+                    <p>All valid JSON is valid JSON5, ensuring backward compatibility with existing JSON data.</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">1.77×</div>
-                    <div class="stat-label">External-JSON5 faster than JSON5</div>
+                <div class="feature-card">
+                    <h3><span class="icon">⚙️</span>Easy Integration</h3>
+                    <p>Simple drop-in replacement for standard JSON with enhanced functionality.</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">0.149ms</div>
-                    <div class="stat-label">JSON5 average time</div>
+                <div class="feature-card">
+                    <h3><span class="icon">📊</span>Performance Tested</h3>
+                    <p>Thoroughly benchmarked against other implementations to ensure reliable performance.</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">0.033ms</div>
-                    <div class="stat-label">JSON average time</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">0.084ms</div>
-                    <div class="stat-label">External-JSON5 average time</div>
-                </div>
+            </div>
+
+            <div class="cta-section">
+                <h3>Ready to get started?</h3>
+                <p>Add JSON5 support to your Kotlin project in minutes</p>
+                <a href="https://github.com/hossain-khan/json5-kotlin" class="cta-button" target="_blank">View on GitHub</a>
+                <a href="#" onclick="showTab('quickstart')" class="cta-button">Quick Start Guide</a>
             </div>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-title">Performance by Data Type and Operation</div>
-            <canvas id="performanceChart"></canvas>
+        <!-- Features Tab -->
+        <div id="features" class="tab-content">
+            <h2>JSON5 Features</h2>
+            <p>JSON5 extends JSON with the following developer-friendly features:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3><span class="icon">💬</span>Comments</h3>
+                    <p>Both line comments <code>//</code> and block comments <code>/* */</code> are supported.</p>
+                    <div class="code-block">
+                        <pre>{
+  // This is a line comment
+  "name": "John", /* block comment */
+  "age": 30
+}</pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3><span class="icon">🔤</span>Unquoted Keys</h3>
+                    <p>Object keys can be unquoted if they're valid identifiers.</p>
+                    <div class="code-block">
+                        <pre>{
+  name: "John",
+  age: 30,
+  isActive: true
+}</pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3><span class="icon">✂️</span>Trailing Commas</h3>
+                    <p>Trailing commas are allowed in objects and arrays.</p>
+                    <div class="code-block">
+                        <pre>{
+  "items": [
+    "apple",
+    "banana",  // ← trailing comma OK
+  ],
+}</pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3><span class="icon">📝</span>Single Quotes</h3>
+                    <p>Strings can use single quotes in addition to double quotes.</p>
+                    <div class="code-block">
+                        <pre>{
+  'name': 'John',
+  "age": 30
+}</pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3><span class="icon">📏</span>Multi-line Strings</h3>
+                    <p>Strings can span multiple lines with backslash at line end.</p>
+                    <div class="code-block">
+                        <pre>{
+  "description": "This is a \
+very long string that \
+spans multiple lines"
+}</pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3><span class="icon">🔢</span>Extended Numbers</h3>
+                    <p>Support for hexadecimal, infinity, NaN, and leading/trailing decimal points.</p>
+                    <div class="code-block">
+                        <pre>{
+  hex: 0xFF,
+  leadingDecimal: .5,
+  trailingDecimal: 2.,
+  infinity: Infinity,
+  notANumber: NaN
+}</pre>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-title">Serialization vs Deserialization Performance</div>
-            <canvas id="operationChart"></canvas>
+        <!-- Quick Start Tab -->
+        <div id="quickstart" class="tab-content">
+            <h2>Quick Start Guide</h2>
+            
+            <h3>Installation</h3>
+            <p>Add the dependency to your <code>build.gradle.kts</code>:</p>
+            <div class="code-block">
+                <pre>repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/hossain-khan/json5-kotlin")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation("hossain.dev:json5kt:1.2.0") // Or, latest release
+}</pre>
+            </div>
+
+            <h3>Basic Usage</h3>
+            <div class="code-block">
+                <pre>import dev.hossain.json5kt.JSON5
+
+// Parse JSON5 string
+val json5String = """
+{
+  // User information
+  name: 'John Doe',
+  age: 30,
+  skills: [
+    'Kotlin',
+    'JSON5',  // trailing comma
+  ],
+}
+"""
+
+val user = JSON5.decodeFromString&lt;User&gt;(json5String)
+
+// Serialize to JSON5
+val json5Output = JSON5.encodeToString(user)</pre>
+            </div>
+
+            <h3>Integration with kotlinx.serialization</h3>
+            <div class="code-block">
+                <pre>@Serializable
+data class User(
+    val name: String,
+    val age: Int,
+    val skills: List&lt;String&gt;
+)
+
+// Configure JSON5 with custom settings
+val json5 = JSON5 {
+    prettyPrint = true
+    ignoreUnknownKeys = true
+}
+
+val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
+            </div>
+
+            <div class="cta-section">
+                <h3>Need Help?</h3>
+                <p>Check out the full documentation and examples</p>
+                <a href="https://github.com/hossain-khan/json5-kotlin#usage" class="cta-button" target="_blank">View Documentation</a>
+                <a href="https://github.com/hossain-khan/json5-kotlin/tree/main/app" class="cta-button" target="_blank">Example App</a>
+            </div>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-title">Overall Performance Comparison (Lower is Better)</div>
-            <canvas id="overallChart"></canvas>
-        </div>
+        <!-- Benchmarks Tab -->
+        <div id="benchmarks" class="tab-content">
+            <h1>JSON5 Performance Benchmark</h1>
+            <p class="subtitle">Interactive Performance Comparison: JSON5 vs JSON vs External-JSON5</p>
+            <p class="subtitle">Generated from benchmark data: June 25, 2025</p>
+            
+            <div class="libraries">
+                <div class="library json5">
+                    <div class="library-name">JSON5 (This Project)</div>
+                    <div class="library-desc">kotlinx.serialization integration</div>
+                </div>
+                <div class="library json">
+                    <div class="library-name">JSON (Standard)</div>
+                    <div class="library-desc">kotlinx.serialization baseline</div>
+                </div>
+                <div class="library external">
+                    <div class="library-name">External-JSON5</div>
+                    <div class="library-desc">at.syntaxerror.json5:2.1.0</div>
+                </div>
+            </div>
 
-        <div class="chart-container">
-            <div class="chart-title">Performance Ratios - How Many Times Slower</div>
-            <canvas id="ratioChart"></canvas>
-        </div>
+            <div class="summary-stats">
+                <h3>Key Performance Insights</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">4.45×</div>
+                        <div class="stat-label">JSON faster than JSON5</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">2.51×</div>
+                        <div class="stat-label">JSON faster than External-JSON5</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">1.77×</div>
+                        <div class="stat-label">External-JSON5 faster than JSON5</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0.149ms</div>
+                        <div class="stat-label">JSON5 average time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0.033ms</div>
+                        <div class="stat-label">JSON average time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0.084ms</div>
+                        <div class="stat-label">External-JSON5 average time</div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="methodology">
-            <h3>Methodology</h3>
-            <p><strong>Test Environment:</strong> JVM warmup with 100 iterations, followed by 1000 iterations per test case.</p>
-            <p><strong>Data Types:</strong> SimplePerson, ComplexPerson, Company, NumberTypes, CollectionTypes, SimplePersonList100, ComplexPersonList50</p>
-            <p><strong>Operations:</strong> Serialization (object to JSON string) and Deserialization (JSON string to object)</p>
-            <p><strong>Libraries:</strong></p>
-            <ul>
-                <li><strong>JSON5:</strong> This project's implementation with kotlinx.serialization integration</li>
-                <li><strong>JSON:</strong> Standard kotlinx.serialization JSON implementation (baseline)</li>
-                <li><strong>External-JSON5:</strong> at.syntaxerror.json5:2.1.0 library</li>
-            </ul>
+            <div class="chart-container">
+                <div class="chart-title">Performance by Data Type and Operation</div>
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Serialization vs Deserialization Performance</div>
+                <canvas id="operationChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Overall Performance Comparison (Lower is Better)</div>
+                <canvas id="overallChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Performance Ratios - How Many Times Slower</div>
+                <canvas id="ratioChart"></canvas>
+            </div>
+
+            <div class="methodology">
+                <h3>Methodology</h3>
+                <p><strong>Test Environment:</strong> JVM warmup with 100 iterations, followed by 1000 iterations per test case.</p>
+                <p><strong>Data Types:</strong> SimplePerson, ComplexPerson, Company, NumberTypes, CollectionTypes, SimplePersonList100, ComplexPersonList50</p>
+                <p><strong>Operations:</strong> Serialization (object to JSON string) and Deserialization (JSON string to object)</p>
+                <p><strong>Libraries:</strong></p>
+                <ul>
+                    <li><strong>JSON5:</strong> This project's implementation with kotlinx.serialization integration</li>
+                    <li><strong>JSON:</strong> Standard kotlinx.serialization JSON implementation (baseline)</li>
+                    <li><strong>External-JSON5:</strong> at.syntaxerror.json5:2.1.0 library</li>
+                </ul>
+            </div>
         </div>
 
         <div class="footer">
-            Generated from benchmark results: benchmark_results_2025-06-25_01-31-43.csv<br>
-            Source: <a href="https://github.com/hossain-khan/json5-kotlin" target="_blank">json5-kotlin</a>
+            <p>© 2025 json5-kotlin | <a href="https://github.com/hossain-khan/json5-kotlin" target="_blank">GitHub</a> | <a href="https://github.com/hossain-khan/json5-kotlin/blob/main/LICENSE" target="_blank">MIT License</a></p>
+            <p>Generated from benchmark results: benchmark_results_2025-06-25_01-31-43.csv</p>
         </div>
     </div>
 
     <script>
-        // Benchmark data from CSV
-        const benchmarkData = [
-            {operation: "Serialization", dataType: "SimplePerson", json5: 0.030744, json: 0.009724, external: 0.011342},
-            {operation: "Deserialization", dataType: "SimplePerson", json5: 0.044855, json: 0.013417, external: 0.016946},
-            {operation: "Serialization", dataType: "ComplexPerson", json5: 0.084276, json: 0.017626, external: 0.032629},
-            {operation: "Deserialization", dataType: "ComplexPerson", json5: 0.093283, json: 0.028409, external: 0.029612},
-            {operation: "Serialization", dataType: "Company", json5: 0.233488, json: 0.055665, external: 0.073242},
-            {operation: "Deserialization", dataType: "Company", json5: 0.24227, json: 0.082065, external: 0.1429},
-            {operation: "Serialization", dataType: "NumberTypes", json5: 0.031356, json: 0.003685, external: 0.007621},
-            {operation: "Deserialization", dataType: "NumberTypes", json5: 0.018881, json: 0.002319, external: 0.008903},
-            {operation: "Serialization", dataType: "CollectionTypes", json5: 0.059759, json: 0.012559, external: 0.011947},
-            {operation: "Deserialization", dataType: "CollectionTypes", json5: 0.055373, json: 0.013326, external: 0.030438},
-            {operation: "Serialization", dataType: "SimplePersonList100", json5: 0.127242, json: 0.025492, external: 0.060501},
-            {operation: "Deserialization", dataType: "SimplePersonList100", json5: 0.193987, json: 0.033556, external: 0.139531},
-            {operation: "Serialization", dataType: "ComplexPersonList50", json5: 0.438785, json: 0.060589, external: 0.15082},
-            {operation: "Deserialization", dataType: "ComplexPersonList50", json5: 0.429654, json: 0.109552, external: 0.459166}
-        ];
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Initialize charts when benchmark tab is shown
+            if (tabName === 'benchmarks') {
+                setTimeout(initializeCharts, 100);
+            }
+        }
 
-        // Chart colors
-        const colors = {
-            json5: '#FFD93D',
-            json: '#4BC0C0',
-            external: '#FF6B35'
-        };
+        // Initialize charts
+        function initializeCharts() {
+            // Only initialize if charts haven't been created yet
+            if (document.querySelector('#performanceChart').chart) {
+                return;
+            }
 
-        // Chart 1: Performance by Data Type and Operation
-        const ctx1 = document.getElementById('performanceChart').getContext('2d');
-        const labels = [...new Set(benchmarkData.map(d => `${d.dataType}\n${d.operation}`))];
-        
-        new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'JSON5 (This Project)',
-                        data: benchmarkData.map(d => d.json5),
-                        backgroundColor: colors.json5,
-                        borderColor: colors.json5,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'JSON (Standard)',
-                        data: benchmarkData.map(d => d.json),
-                        backgroundColor: colors.json,
-                        borderColor: colors.json,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'External-JSON5',
-                        data: benchmarkData.map(d => d.external),
-                        backgroundColor: colors.external,
-                        borderColor: colors.external,
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Time (milliseconds)'
+            // Benchmark data from CSV
+            const benchmarkData = [
+                {operation: "Serialization", dataType: "SimplePerson", json5: 0.030744, json: 0.009724, external: 0.011342},
+                {operation: "Deserialization", dataType: "SimplePerson", json5: 0.044855, json: 0.013417, external: 0.016946},
+                {operation: "Serialization", dataType: "ComplexPerson", json5: 0.084276, json: 0.017626, external: 0.032629},
+                {operation: "Deserialization", dataType: "ComplexPerson", json5: 0.093283, json: 0.028409, external: 0.029612},
+                {operation: "Serialization", dataType: "Company", json5: 0.233488, json: 0.055665, external: 0.073242},
+                {operation: "Deserialization", dataType: "Company", json5: 0.24227, json: 0.082065, external: 0.1429},
+                {operation: "Serialization", dataType: "NumberTypes", json5: 0.031356, json: 0.003685, external: 0.007621},
+                {operation: "Deserialization", dataType: "NumberTypes", json5: 0.018881, json: 0.002319, external: 0.008903},
+                {operation: "Serialization", dataType: "CollectionTypes", json5: 0.059759, json: 0.012559, external: 0.011947},
+                {operation: "Deserialization", dataType: "CollectionTypes", json5: 0.055373, json: 0.013326, external: 0.030438},
+                {operation: "Serialization", dataType: "SimplePersonList100", json5: 0.127242, json: 0.025492, external: 0.060501},
+                {operation: "Deserialization", dataType: "SimplePersonList100", json5: 0.193987, json: 0.033556, external: 0.139531},
+                {operation: "Serialization", dataType: "ComplexPersonList50", json5: 0.438785, json: 0.060589, external: 0.15082},
+                {operation: "Deserialization", dataType: "ComplexPersonList50", json5: 0.429654, json: 0.109552, external: 0.459166}
+            ];
+
+            // Chart colors
+            const colors = {
+                json5: '#FFD93D',
+                json: '#4BC0C0',
+                external: '#FF6B35'
+            };
+
+            // Chart 1: Performance by Data Type and Operation
+            const ctx1 = document.getElementById('performanceChart').getContext('2d');
+            const labels = [...new Set(benchmarkData.map(d => `${d.dataType}\n${d.operation}`))];
+            
+            const chart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'JSON5 (This Project)',
+                            data: benchmarkData.map(d => d.json5),
+                            backgroundColor: colors.json5,
+                            borderColor: colors.json5,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'JSON (Standard)',
+                            data: benchmarkData.map(d => d.json),
+                            backgroundColor: colors.json,
+                            borderColor: colors.json,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'External-JSON5',
+                            data: benchmarkData.map(d => d.external),
+                            backgroundColor: colors.external,
+                            borderColor: colors.external,
+                            borderWidth: 1
                         }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Data Type & Operation'
-                        }
-                    }
+                    ]
                 },
-                plugins: {
-                    legend: {
-                        position: 'top'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Time (milliseconds)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Data Type & Operation'
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms`;
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms`;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
 
-        // Chart 2: Serialization vs Deserialization
-        const ctx2 = document.getElementById('operationChart').getContext('2d');
-        const serializationData = benchmarkData.filter(d => d.operation === 'Serialization');
-        const deserializationData = benchmarkData.filter(d => d.operation === 'Deserialization');
-        
-        const avgSerialization = {
-            json5: serializationData.reduce((sum, d) => sum + d.json5, 0) / serializationData.length,
-            json: serializationData.reduce((sum, d) => sum + d.json, 0) / serializationData.length,
-            external: serializationData.reduce((sum, d) => sum + d.external, 0) / serializationData.length
-        };
-        
-        const avgDeserialization = {
-            json5: deserializationData.reduce((sum, d) => sum + d.json5, 0) / deserializationData.length,
-            json: deserializationData.reduce((sum, d) => sum + d.json, 0) / deserializationData.length,
-            external: deserializationData.reduce((sum, d) => sum + d.external, 0) / deserializationData.length
-        };
+            // Chart 2: Serialization vs Deserialization
+            const ctx2 = document.getElementById('operationChart').getContext('2d');
+            const serializationData = benchmarkData.filter(d => d.operation === 'Serialization');
+            const deserializationData = benchmarkData.filter(d => d.operation === 'Deserialization');
+            
+            const avgSerialization = {
+                json5: serializationData.reduce((sum, d) => sum + d.json5, 0) / serializationData.length,
+                json: serializationData.reduce((sum, d) => sum + d.json, 0) / serializationData.length,
+                external: serializationData.reduce((sum, d) => sum + d.external, 0) / serializationData.length
+            };
+            
+            const avgDeserialization = {
+                json5: deserializationData.reduce((sum, d) => sum + d.json5, 0) / deserializationData.length,
+                json: deserializationData.reduce((sum, d) => sum + d.json, 0) / deserializationData.length,
+                external: deserializationData.reduce((sum, d) => sum + d.external, 0) / deserializationData.length
+            };
 
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['Serialization', 'Deserialization'],
-                datasets: [
-                    {
-                        label: 'JSON5 (This Project)',
-                        data: [avgSerialization.json5, avgDeserialization.json5],
-                        backgroundColor: colors.json5,
-                        borderColor: colors.json5,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'JSON (Standard)',
-                        data: [avgSerialization.json, avgDeserialization.json],
-                        backgroundColor: colors.json,
-                        borderColor: colors.json,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'External-JSON5',
-                        data: [avgSerialization.external, avgDeserialization.external],
-                        backgroundColor: colors.external,
-                        borderColor: colors.external,
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Average Time (milliseconds)'
+            const chart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Serialization', 'Deserialization'],
+                    datasets: [
+                        {
+                            label: 'JSON5 (This Project)',
+                            data: [avgSerialization.json5, avgDeserialization.json5],
+                            backgroundColor: colors.json5,
+                            borderColor: colors.json5,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'JSON (Standard)',
+                            data: [avgSerialization.json, avgDeserialization.json],
+                            backgroundColor: colors.json,
+                            borderColor: colors.json,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'External-JSON5',
+                            data: [avgSerialization.external, avgDeserialization.external],
+                            backgroundColor: colors.external,
+                            borderColor: colors.external,
+                            borderWidth: 1
                         }
-                    }
+                    ]
                 },
-                plugins: {
-                    legend: {
-                        position: 'top'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Average Time (milliseconds)'
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms avg`;
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}ms avg`;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
 
-        // Chart 3: Overall Performance Comparison
-        const ctx3 = document.getElementById('overallChart').getContext('2d');
-        const overallAvg = {
-            json5: 0.149,
-            json: 0.033,
-            external: 0.084
-        };
+            // Chart 3: Overall Performance Comparison
+            const ctx3 = document.getElementById('overallChart').getContext('2d');
+            const overallAvg = {
+                json5: 0.149,
+                json: 0.033,
+                external: 0.084
+            };
 
-        new Chart(ctx3, {
-            type: 'doughnut',
-            data: {
-                labels: ['JSON5 (This Project)', 'JSON (Standard)', 'External-JSON5'],
-                datasets: [{
-                    data: [overallAvg.json5, overallAvg.json, overallAvg.external],
-                    backgroundColor: [colors.json5, colors.json, colors.external],
-                    borderColor: [colors.json5, colors.json, colors.external],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.label}: ${context.parsed.toFixed(3)}ms avg`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Chart 4: Performance Ratios
-        const ctx4 = document.getElementById('ratioChart').getContext('2d');
-        new Chart(ctx4, {
-            type: 'bar',
-            data: {
-                labels: ['JSON5 vs JSON', 'External-JSON5 vs JSON', 'JSON5 vs External-JSON5'],
-                datasets: [{
-                    label: 'Performance Ratio (times slower)',
-                    data: [4.45, 2.51, 1.77],
-                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
-                    borderColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Times Slower (ratio)'
-                        }
-                    }
+            const chart3 = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: ['JSON5 (This Project)', 'JSON (Standard)', 'External-JSON5'],
+                    datasets: [{
+                        data: [overallAvg.json5, overallAvg.json, overallAvg.external],
+                        backgroundColor: [colors.json5, colors.json, colors.external],
+                        borderColor: [colors.json5, colors.json, colors.external],
+                        borderWidth: 2
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.parsed.y.toFixed(2)}× slower`;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed.toFixed(3)}ms avg`;
+                                }
                             }
                         }
                     }
                 }
-            }
+            });
+
+            // Chart 4: Performance Ratios
+            const ctx4 = document.getElementById('ratioChart').getContext('2d');
+            const chart4 = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['JSON5 vs JSON', 'External-JSON5 vs JSON', 'JSON5 vs External-JSON5'],
+                    datasets: [{
+                        label: 'Performance Ratio (times slower)',
+                        data: [4.45, 2.51, 1.77],
+                        backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
+                        borderColor: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Times Slower (ratio)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y.toFixed(2)}× slower`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize default tab
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default to overview tab
+            showTab('overview');
         });
     </script>
 </body>
