@@ -69,11 +69,17 @@
             color: #007bff;
             border-bottom-color: #007bff;
         }
+        .nav-tab:hover { /* Added for hover effect */
+            transform: translateY(-2px);
+        }
         .tab-content {
             display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
         .tab-content.active {
             display: block;
+            opacity: 1;
         }
         .feature-grid {
             display: grid;
@@ -219,12 +225,29 @@
             padding: 15px;
             border-radius: 8px;
             min-width: 150px;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; /* Added for hover effect */
+        }
+        .library:hover { /* Added for hover effect */
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .library.json5 { background: #ffeaa7; }
         .library.json { background: #81ecec; }
         .library.external { background: #fab1a0; }
         .library-name { font-weight: bold; margin-bottom: 5px; }
         .library-desc { font-size: 0.9em; color: #666; }
+
+        /* Animations for scroll */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -253,29 +276,29 @@
             <p>A robust JSON5 parser and serializer for Kotlin that extends JSON with helpful features like comments, trailing commas, and unquoted keys while maintaining full backward compatibility with JSON.</p>
             
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">🚀</span>Modern Architecture</h3>
                     <p>Built with kotlinx.serialization for seamless integration with Kotlin projects and type-safe serialization.</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">🔄</span>Full Compatibility</h3>
                     <p>All valid JSON is valid JSON5, ensuring backward compatibility with existing JSON data.</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">⚙️</span>Easy Integration</h3>
                     <p>Simple drop-in replacement for standard JSON with enhanced functionality.</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">📊</span>Performance Tested</h3>
                     <p>Thoroughly benchmarked against other implementations to ensure reliable performance.</p>
                 </div>
             </div>
 
-            <div class="cta-section">
+            <div class="cta-section animate-on-scroll">
                 <h3>Ready to get started?</h3>
                 <p>Add JSON5 support to your Kotlin project in minutes</p>
                 <a href="https://github.com/hossain-khan/json5-kotlin" class="cta-button" target="_blank">View on GitHub</a>
-                <a href="#" onclick="showTab('quickstart')" class="cta-button">Quick Start Guide</a>
+                <a href="#" onclick="showTab('quickstart', document.querySelector('.nav-tab[onclick*=\\'quickstart\\']'))" class="cta-button">Quick Start Guide</a>
             </div>
         </div>
 
@@ -285,10 +308,10 @@
             <p>JSON5 extends JSON with the following developer-friendly features:</p>
             
             <div class="feature-grid">
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">💬</span>Comments</h3>
                     <p>Both line comments <code>//</code> and block comments <code>/* */</code> are supported.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   // This is a line comment
   "name": "John", /* block comment */
@@ -296,10 +319,10 @@
 }</pre>
                     </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">🔤</span>Unquoted Keys</h3>
                     <p>Object keys can be unquoted if they're valid identifiers.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   name: "John",
   age: 30,
@@ -307,10 +330,10 @@
 }</pre>
                     </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">✂️</span>Trailing Commas</h3>
                     <p>Trailing commas are allowed in objects and arrays.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   "items": [
     "apple",
@@ -319,20 +342,20 @@
 }</pre>
                     </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">📝</span>Single Quotes</h3>
                     <p>Strings can use single quotes in addition to double quotes.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   'name': 'John',
   "age": 30
 }</pre>
                     </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">📏</span>Multi-line Strings</h3>
                     <p>Strings can span multiple lines with backslash at line end.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   "description": "This is a \
 very long string that \
@@ -340,10 +363,10 @@ spans multiple lines"
 }</pre>
                     </div>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <h3><span class="icon">🔢</span>Extended Numbers</h3>
                     <p>Support for hexadecimal, infinity, NaN, and leading/trailing decimal points.</p>
-                    <div class="code-block">
+                    <div class="code-block animate-on-scroll">
                         <pre>{
   hex: 0xFF,
   leadingDecimal: .5,
@@ -362,7 +385,7 @@ spans multiple lines"
             
             <h3>Installation</h3>
             <p>Add the dependency to your <code>build.gradle.kts</code>:</p>
-            <div class="code-block">
+            <div class="code-block animate-on-scroll">
                 <pre>repositories {
     maven {
         name = "GitHubPackages"
@@ -380,7 +403,7 @@ dependencies {
             </div>
 
             <h3>Basic Usage</h3>
-            <div class="code-block">
+            <div class="code-block animate-on-scroll">
                 <pre>import dev.hossain.json5kt.JSON5
 
 // Parse JSON5 string
@@ -403,7 +426,7 @@ val json5Output = JSON5.encodeToString(user)</pre>
             </div>
 
             <h3>Integration with kotlinx.serialization</h3>
-            <div class="code-block">
+            <div class="code-block animate-on-scroll">
                 <pre>@Serializable
 data class User(
     val name: String,
@@ -420,7 +443,7 @@ val json5 = JSON5 {
 val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
             </div>
 
-            <div class="cta-section">
+            <div class="cta-section animate-on-scroll">
                 <h3>Need Help?</h3>
                 <p>Check out the full documentation and examples</p>
                 <a href="https://github.com/hossain-khan/json5-kotlin#usage" class="cta-button" target="_blank">View Documentation</a>
@@ -434,7 +457,7 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
             <p class="subtitle">Interactive Performance Comparison: JSON5 vs JSON vs External-JSON5</p>
             <p class="subtitle">Generated from benchmark data: June 25, 2025</p>
             
-            <div class="libraries">
+            <div class="libraries animate-on-scroll">
                 <div class="library json5">
                     <div class="library-name">JSON5 (This Project)</div>
                     <div class="library-desc">kotlinx.serialization integration</div>
@@ -449,57 +472,57 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                 </div>
             </div>
 
-            <div class="summary-stats">
+            <div class="summary-stats animate-on-scroll">
                 <h3>Key Performance Insights</h3>
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">4.45×</div>
                         <div class="stat-label">JSON faster than JSON5</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">2.51×</div>
                         <div class="stat-label">JSON faster than External-JSON5</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">1.77×</div>
                         <div class="stat-label">External-JSON5 faster than JSON5</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">0.149ms</div>
                         <div class="stat-label">JSON5 average time</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">0.033ms</div>
                         <div class="stat-label">JSON average time</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card animate-on-scroll">
                         <div class="stat-value">0.084ms</div>
                         <div class="stat-label">External-JSON5 average time</div>
                     </div>
                 </div>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <div class="chart-title">Performance by Data Type and Operation</div>
                 <canvas id="performanceChart"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <div class="chart-title">Serialization vs Deserialization Performance</div>
                 <canvas id="operationChart"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <div class="chart-title">Overall Performance Comparison (Lower is Better)</div>
                 <canvas id="overallChart"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <div class="chart-title">Performance Ratios - How Many Times Slower</div>
                 <canvas id="ratioChart"></canvas>
             </div>
 
-            <div class="methodology">
+            <div class="methodology animate-on-scroll">
                 <h3>Methodology</h3>
                 <p><strong>Test Environment:</strong> JVM warmup with 100 iterations, followed by 1000 iterations per test case.</p>
                 <p><strong>Data Types:</strong> SimplePerson, ComplexPerson, Company, NumberTypes, CollectionTypes, SimplePersonList100, ComplexPersonList50</p>
@@ -521,26 +544,117 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
 
     <script>
         // Tab functionality
-        function showTab(tabName) {
-            // Hide all tab contents
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
+        function showTab(tabName, clickedNavTabElement) {
+            const currentActiveTab = document.querySelector('.tab-content.active');
+            const newTab = document.getElementById(tabName);
+
             // Remove active class from all nav tabs
             const navTabs = document.querySelectorAll('.nav-tab');
             navTabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked nav tab
-            event.target.classList.add('active');
-            
-            // Initialize charts when benchmark tab is shown
-            if (tabName === 'benchmarks') {
-                setTimeout(initializeCharts, 100);
+
+            // Add active class to the clicked nav tab
+            if (clickedNavTabElement) {
+                clickedNavTabElement.classList.add('active');
+            } else {
+                // Fallback if called without a clicked element (e.g. programmatically)
+                // Find the nav tab that corresponds to tabName
+                document.querySelector(`.nav-tab[onclick*="'${tabName}'"]`).classList.add('active');
+            }
+
+            function switchTabs() {
+                if (newTab) {
+                    newTab.style.display = 'block';
+                    // Force reflow/repaint before adding class to trigger transition
+                    void newTab.offsetWidth;
+                    newTab.classList.add('active');
+
+                    // Smooth scroll to the top of the container after tab switch
+                    const containerElement = document.querySelector('.container');
+                    if (containerElement) {
+                        containerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+
+                // Initialize charts when benchmark tab is shown
+                if (tabName === 'benchmarks') {
+                    // Ensure charts are initialized after the tab is visible
+                    setTimeout(initializeCharts, 50); // Reduced timeout, was 100
+                }
+            }
+
+            if (currentActiveTab && currentActiveTab !== newTab) {
+                currentActiveTab.classList.remove('active'); // Start fade out
+
+                // Wait for fade out to complete before hiding it and showing new one
+                currentActiveTab.addEventListener('transitionend', function handler(e) {
+                    if (e.propertyName === 'opacity' && !currentActiveTab.classList.contains('active')) {
+                        currentActiveTab.style.display = 'none';
+                        currentActiveTab.removeEventListener('transitionend', handler);
+                        switchTabs();
+                    }
+                });
+            } else if (!currentActiveTab && newTab) {
+                // If no tab was active, just show the new one
+                switchTabs();
+            } else if (currentActiveTab && currentActiveTab === newTab) {
+                // If clicking the same tab, do nothing or re-init if needed
+                // For now, do nothing. If benchmarks tab, ensure charts are there.
+                if (tabName === 'benchmarks') {
+                    setTimeout(initializeCharts, 50);
+                }
             }
         }
+
+        // Modify nav-tab onclick attributes to pass 'this'
+        document.addEventListener('DOMContentLoaded', function() {
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                root: null, // relative to document viewport
+                rootMargin: '0px',
+                threshold: 0.1 // trigger when 10% of the element is visible, adjust as needed
+            };
+
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Animate only once
+                    }
+                });
+            };
+
+            const scrollObserver = new IntersectionObserver(observerCallback, observerOptions);
+
+            // Query for elements to animate after DOM is loaded
+            // This is done here to ensure elements exist.
+            // If elements are dynamically added later and need animation, they'd need to be observed then.
+            const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
+            elementsToAnimate.forEach(el => scrollObserver.observe(el));
+
+            // Tab functionality and initial tab setup
+            const navTabElements = document.querySelectorAll('.nav-tab');
+            navTabElements.forEach(tabEl => {
+                const originalOnclick = tabEl.getAttribute('onclick');
+                if (originalOnclick) {
+                    // Extracts the tab name, e.g., "showTab('overview')" -> "overview"
+                    const tabNameMatch = originalOnclick.match(/showTab\(['"]([^'"]+)['"]\)/);
+                    if (tabNameMatch && tabNameMatch[1]) {
+                        const tabName = tabNameMatch[1];
+                        tabEl.setAttribute('onclick', `showTab('${tabName}', this)`);
+                    }
+                }
+            });
+
+            // Initialize default tab (overview)
+            // Find the overview nav tab element to pass to showTab
+            const overviewNavTab = document.querySelector(".nav-tab[onclick*=\"'overview'\"]");
+            if (overviewNavTab) {
+                 showTab('overview', overviewNavTab);
+            } else {
+                // Fallback if somehow the overview tab isn't found with the expected onclick
+                showTab('overview', document.querySelector('.nav-tab')); // Default to first nav tab
+            }
+        });
 
         // Initialize charts
         function initializeCharts() {
@@ -609,6 +723,10 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutCubic'
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -626,7 +744,24 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                     },
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'top',
+                            onClick: (e, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                const ci = legend.chart;
+                                if (ci.isDatasetVisible(index)) {
+                                    ci.hide(index);
+                                    legendItem.hidden = true;
+                                } else {
+                                    ci.show(index);
+                                    legendItem.hidden = false;
+                                }
+                            },
+                            onHover: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'pointer';
+                            },
+                            onLeave: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'default';
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -635,6 +770,28 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                                 }
                             }
                         }
+                    },
+                    onHover: (event, chartElement, chart) => {
+                        const canvas = chart.canvas;
+                        canvas.style.cursor = 'default'; // Default cursor
+
+                        // Reset all elements to their default state first
+                        for (let i = 0; i < chart.data.datasets.length; i++) {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach(element => {
+                                element.custom = element.custom || {};
+                                element.options.borderWidth = 1;
+                                element.options.offset = 0;
+                            });
+                        }
+
+                        if (chartElement.length > 0) {
+                            canvas.style.cursor = 'pointer'; // Pointer cursor on hover
+                            const activeEl = chartElement[0].element;
+                            activeEl.options.borderWidth = 3;
+                            activeEl.options.offset = 5;
+                        }
+                        chart.update();
                     }
                 }
             });
@@ -687,6 +844,10 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutCubic'
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -698,7 +859,24 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                     },
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'top',
+                            onClick: (e, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                const ci = legend.chart;
+                                if (ci.isDatasetVisible(index)) {
+                                    ci.hide(index);
+                                    legendItem.hidden = true;
+                                } else {
+                                    ci.show(index);
+                                    legendItem.hidden = false;
+                                }
+                            },
+                            onHover: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'pointer';
+                            },
+                            onLeave: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'default';
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -707,6 +885,27 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                                 }
                             }
                         }
+                    },
+                    onHover: (event, chartElement, chart) => {
+                        const canvas = chart.canvas;
+                        canvas.style.cursor = 'default';
+
+                        for (let i = 0; i < chart.data.datasets.length; i++) {
+                            const meta = chart.getDatasetMeta(i);
+                            meta.data.forEach(element => {
+                                element.custom = element.custom || {};
+                                element.options.borderWidth = 1;
+                                element.options.offset = 0;
+                            });
+                        }
+
+                        if (chartElement.length > 0) {
+                            canvas.style.cursor = 'pointer';
+                            const activeEl = chartElement[0].element;
+                            activeEl.options.borderWidth = 3;
+                            activeEl.options.offset = 5;
+                        }
+                        chart.update();
                     }
                 }
             });
@@ -733,9 +932,25 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutCubic'
+                    },
                     plugins: {
                         legend: {
-                            position: 'right'
+                            position: 'right',
+                             onClick: (e, legendItem, legend) => {
+                                const index = legendItem.index; // For doughnut charts, it's legendItem.index
+                                const ci = legend.chart;
+                                ci.toggleDataVisibility(index);
+                                ci.update();
+                            },
+                            onHover: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'pointer';
+                            },
+                            onLeave: (event, legendItem, legend) => {
+                                legend.chart.canvas.style.cursor = 'default';
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -744,6 +959,24 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                                 }
                             }
                         }
+                    },
+                     onHover: (event, chartElement, chart) => {
+                        if (chartElement.length) {
+                            chart.canvas.style.cursor = 'pointer';
+                            const activeEl = chartElement[0].element;
+                            activeEl.outerRadiusOffset = 10; // Make segment pop
+                            activeEl.borderWidth = 3; // Thicken border
+                        } else {
+                            // Reset all segments
+                            chart.data.datasets.forEach(dataset => {
+                                dataset.elements.forEach(el => {
+                                    el.outerRadiusOffset = 0;
+                                    el.borderWidth = chart.options.elements.doughnut.borderWidth || 2; // Reset to original or default
+                                });
+                            });
+                            chart.canvas.style.cursor = 'default';
+                        }
+                        chart.update();
                     }
                 }
             });
@@ -765,6 +998,10 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutCubic'
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -776,7 +1013,7 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: false // No legend needed for this chart
                         },
                         tooltip: {
                             callbacks: {
@@ -785,6 +1022,26 @@ val user = json5.decodeFromString&lt;User&gt;(json5String)</pre>
                                 }
                             }
                         }
+                    },
+                    onHover: (event, chartElement, chart) => {
+                        if (chartElement.length) {
+                            chart.canvas.style.cursor = 'pointer';
+                            const activeEl = chartElement[0].element;
+                            activeEl.base = Math.max(0, activeEl.base - 2); // Example: make bar slightly thicker or offset
+                            activeEl.height = activeEl.height + 4;
+                            activeEl.borderWidth = 2;
+                        } else {
+                             chart.data.datasets.forEach((dataset, i) => {
+                                dataset.elements.forEach(el => {
+                                    // This reset is tricky for bar charts as base/height are calculated
+                                    // We'll rely on Chart.js's own hover reset mostly
+                                    // Or we'd need to store original values
+                                    el.borderWidth = 1;
+                                });
+                            });
+                            chart.canvas.style.cursor = 'default';
+                        }
+                        chart.update();
                     }
                 }
             });
