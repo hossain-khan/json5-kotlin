@@ -36,3 +36,18 @@ build/
 # Benchmark result files
 benchmark_results_*.csv
 benchmark_summary_*.txt
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
