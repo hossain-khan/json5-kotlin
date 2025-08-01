@@ -18,7 +18,7 @@ plugins {
 
 // Include the `app`, `lib` and `benchmark` subprojects in the build.
 // If there are changes in only one of the projects, Gradle will rebuild only the one that has changed.
-// Learn more about structuring projects with Gradle - https://docs.gradle.org/8.7/userguide/multi_project_builds.html
+// Learn more about structuring projects with Gradle - https://docs.gradle.org/8.14.2/userguide/multi_project_builds.html
 include(":app")
 include(":lib")
 include(":benchmark")

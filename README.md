@@ -95,12 +95,15 @@ To access GitHub Packages, you need to authenticate with GitHub. You can do this
 
 You can generate a personal access token at [GitHub > Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) with `read:packages` permission.
 
+> **Note**: Make sure to use the **classic** personal access token format, not the new fine-grained tokens, as GitHub Packages currently requires classic tokens.
+
 ## Usage
 
 ### Basic Parsing and Stringifying
 
 ```kotlin
 import dev.hossain.json5kt.JSON5
+import dev.hossain.json5kt.JSON5Exception
 
 // Parse JSON5 to strongly-typed JSON5Value objects
 val json5 = """
@@ -112,20 +115,24 @@ val json5 = """
 }
 """
 
-val parsed = JSON5.parse(json5)
-// Returns: JSON5Value.Object
-
-// Access values in a type-safe way
-when (parsed) {
-    is JSON5Value.Object -> {
-        val name = parsed.value["name"] as? JSON5Value.String
-        val version = parsed.value["version"] as? JSON5Value.Number.Integer
-        val features = parsed.value["features"] as? JSON5Value.Array
-        
-        println("App name: ${name?.value}") // "MyApp"
-        println("Version: ${version?.value}") // 2
-        println("Features: ${features?.value?.map { (it as JSON5Value.String).value }}") // ["auth", "analytics"]
+try {
+    val parsed = JSON5.parse(json5)
+    // Returns: JSON5Value.Object
+    
+    // Access values in a type-safe way
+    when (parsed) {
+        is JSON5Value.Object -> {
+            val name = parsed.value["name"] as? JSON5Value.String
+            val version = parsed.value["version"] as? JSON5Value.Number.Integer
+            val features = parsed.value["features"] as? JSON5Value.Array
+            
+            println("App name: ${name?.value}") // "MyApp"
+            println("Version: ${version?.value}") // 2
+            println("Features: ${features?.value?.map { (it as JSON5Value.String).value }}") // ["auth", "analytics"]
+        }
     }
+} catch (e: JSON5Exception) {
+    println("Failed to parse JSON5: ${e.message}")
 }
 
 // Stringify Kotlin objects to JSON5
@@ -142,7 +149,9 @@ val json5String = JSON5.stringify(data)
 
 ```kotlin
 import dev.hossain.json5kt.JSON5
+import dev.hossain.json5kt.JSON5Exception
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 
 @Serializable
 data class Config(
@@ -160,28 +169,35 @@ val config = Config(
     settings = mapOf("theme" to "dark", "lang" to "en")
 )
 
-val json5 = JSON5.encodeToString(Config.serializer(), config)
-// Result: {appName:'MyApp',version:2,features:['auth','analytics'],settings:{theme:'dark',lang:'en'}}
-
-// Deserialize from JSON5 (with comments and formatting)
-val json5WithComments = """
-{
-    // Application configuration
-    appName: 'MyApp',
-    version: 2, // current version
-    features: [
-        'auth',
-        'analytics', // trailing comma OK
-    ],
-    settings: {
-        theme: 'dark',
-        lang: 'en',
+try {
+    val json5 = JSON5.encodeToString(Config.serializer(), config)
+    // Result: {appName:'MyApp',version:2,features:['auth','analytics'],settings:{theme:'dark',lang:'en'}}
+    
+    // Deserialize from JSON5 (with comments and formatting)
+    val json5WithComments = """
+    {
+        // Application configuration
+        appName: 'MyApp',
+        version: 2, // current version
+        features: [
+            'auth',
+            'analytics', // trailing comma OK
+        ],
+        settings: {
+            theme: 'dark',
+            lang: 'en',
+        }
     }
+    """
+    
+    val decoded = JSON5.decodeFromString(Config.serializer(), json5WithComments)
+    // Returns: Config instance
+    println("Loaded config: $decoded")
+} catch (e: JSON5Exception) {
+    println("JSON5 parsing error: ${e.message}")
+} catch (e: SerializationException) {
+    println("Serialization error: ${e.message}")
 }
-"""
-
-val decoded = JSON5.decodeFromString(Config.serializer(), json5WithComments)
-// Returns: Config instance
 ```
 
 ### Advanced Features
@@ -243,11 +259,42 @@ when (complex) {
 This project uses [Gradle](https://gradle.org/) with Java 21:
 
 ```bash
-./gradlew build    # Build the library
-./gradlew test     # Run tests
-./gradlew check    # Run all checks including tests
-./gradlew :benchmark:run # Runs the benchmark
+./gradlew build                # Build all modules
+./gradlew test                 # Run tests
+./gradlew check                # Run all checks including tests, linting, and coverage
+./gradlew formatKotlin         # Format code with ktlint
+./gradlew :benchmark:run       # Run performance benchmarks
+./gradlew koverHtmlReport      # Generate code coverage report
 ```
+
+### Requirements
+
+- **Java 21** or later
+- **Git** (for submodules containing JSON5 specification)
+
+## Troubleshooting
+
+### Common Issues
+
+**Build fails with "Build requires Java 21"**
+- Ensure you have Java 21 installed: `java -version`
+- Set `JAVA_HOME` environment variable to Java 21 installation
+
+**Gradle daemon issues**
+- Stop the daemon: `./gradlew --stop`
+- Try again with: `./gradlew build --no-daemon`
+
+**GitHub Packages authentication issues**
+- Verify your GitHub username and personal access token
+- Ensure the token has `read:packages` permission
+- Use classic tokens, not fine-grained tokens
+
+**Submodule not initialized**
+```bash
+git submodule update --init --recursive
+```
+
+For more detailed troubleshooting, see our [Development Guide](.github/DEVELOPMENT.md).
 
 ## Contributing
 

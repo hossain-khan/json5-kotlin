@@ -141,9 +141,10 @@ lib/src/main/kotlin/dev/hossain/json5kt/
 **Key Components:**
 
 1. **JSON5** - Main API facade
-   - `parseToJsonElement()` - Parse JSON5 to JsonElement
-   - `encodeToString()` - Serialize objects to JSON5
-   - `decodeFromString()` - Deserialize JSON5 to objects
+   - `parse()` - Parse JSON5 to JSON5Value objects
+   - `stringify()` - Convert Kotlin objects to JSON5 strings
+   - `encodeToString()` - Serialize objects to JSON5 using kotlinx.serialization
+   - `decodeFromString()` - Deserialize JSON5 to objects using kotlinx.serialization
 
 2. **JSON5Parser** - Core parsing engine
    - Handles JSON5 syntax: comments, unquoted keys, trailing commas
@@ -204,9 +205,9 @@ open lib/build/reports/kover/html/index.html
 1. **Parsing Errors**
    ```kotlin
    try {
-       val result = JSON5.parseToJsonElement(json5Text)
+       val result = JSON5.parse(json5Text)
    } catch (e: JSON5Exception) {
-       println("Parse error at position ${e.position}: ${e.message}")
+       println("Parse error at line ${e.lineNumber}, column ${e.columnNumber}: ${e.message}")
    }
    ```
 

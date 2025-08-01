@@ -135,10 +135,24 @@ class JSON5ParserTest {
         """.trimIndent()
         
         // When
-        val result = JSON5.parseToJsonElement(json5)
+        val result = JSON5.parse(json5)
         
         // Then
-        // assertions...
+        assertThat(result).isInstanceOf(JSON5Value.Object::class.java)
+        val obj = result as JSON5Value.Object
+        assertThat((obj.value["name"] as JSON5Value.String).value).isEqualTo("test")
+        assertThat((obj.value["value"] as JSON5Value.Number.Integer).value).isEqualTo(42)
+    }
+    
+    @Test
+    fun `should throw exception for invalid JSON5`() {
+        // Given
+        val invalidJson5 = "{ invalid: syntax }"
+        
+        // When & Then
+        assertThrows<JSON5Exception> {
+            JSON5.parse(invalidJson5)
+        }
     }
 }
 ```
