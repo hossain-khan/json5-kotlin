@@ -223,7 +223,7 @@ class JSON5ValueTest {
      */
     @Test
     fun `should skip non-string keys in map conversion`() {
-        val mapWithNonStringKey = mapOf(1 to "value", "key" to "otherValue") as Map<Any?, Any?>
+        val mapWithNonStringKey: Map<Any?, Any?> = mapOf(1 to "value", "key" to "otherValue")
         val result = JSON5Value.from(mapWithNonStringKey)
         result.shouldBeInstanceOf<JSON5Value.Object>()
         val obj = result as JSON5Value.Object
