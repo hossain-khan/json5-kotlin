@@ -102,10 +102,10 @@ class JSON5ParseTest {
     }
 
     /**
-     * Tests parsing of JSON5 object property names with special characters.
-     * This test highlights a deviation from the JSON5 specification (section 2.3) regarding valid identifier characters.
-     * The JSON5 spec allows `$` and `_` as identifier start/part characters, but this parser currently flags `$` as invalid in this context.
-     * The original expectation `mapOf("\$_" to 1.0, "_$" to 2.0, "a\u200C" to 3.0)` is commented out.
+     * Tests that the parser throws an exception when encountering a `$` character directly in a property name.
+     * This test documents a deviation from the JSON5 specification (section 2.3), which allows `$` and `_`
+     * as identifier start/part characters. The current parser implementation incorrectly flags `$` as invalid.
+     * When the parser is fixed to comply with the spec, this test should be updated to verify successful parsing.
      */
     @Test
     fun `should parse special character property names`() {
@@ -129,11 +129,12 @@ class JSON5ParseTest {
     }
 
     /**
-     * Tests parsing of JSON5 object property names with escaped characters.
-     * This test highlights a deviation from the JSON5 specification (section 2.3) regarding valid identifier characters.
-     * The JSON5 spec allows Unicode escape sequences (e.g., `\u0024` for `$`) to form valid identifiers.
-     * This parser currently flags the backslash of an escape sequence as an invalid character in this context.
-     * The original expectation `mapOf("ab" to 1.0, "\$_" to 2.0, "_$" to 3.0)` is commented out.
+     * Tests that the parser throws an exception when encountering escaped property names with double backslashes.
+     * This test documents a deviation from the JSON5 specification (section 2.3), which allows Unicode escape
+     * sequences (e.g., `\u0024` for `$`) to form valid identifiers. The current parser implementation
+     * incorrectly interprets the backslash as an invalid character in this context.
+     * When the parser is fixed to comply with the spec, this test should be updated to verify successful parsing
+     * with the expectation `mapOf("ab" to 1.0, "\$_" to 2.0, "_$" to 3.0)`.
      */
     @Test
     fun `should parse escaped property names`() {

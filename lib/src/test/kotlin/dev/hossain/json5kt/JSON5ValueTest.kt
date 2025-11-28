@@ -147,4 +147,87 @@ class JSON5ValueTest {
 
         arr.value[3] shouldBe JSON5Value.Null
     }
+
+    /**
+     * Tests that Float values are correctly converted to JSON5Value.Number.Decimal.
+     */
+    @Test
+    fun `should handle Float types correctly`() {
+        val floatResult = JSON5Value.from(3.14f)
+        floatResult.shouldBeInstanceOf<JSON5Value.Number.Decimal>()
+        (floatResult as JSON5Value.Number.Decimal).value shouldBe 3.14f.toDouble()
+    }
+
+    /**
+     * Tests that special Double values (Infinity, NaN) are correctly converted to their JSON5Value equivalents.
+     */
+    @Test
+    fun `should handle special Double values correctly`() {
+        val posInfResult = JSON5Value.from(Double.POSITIVE_INFINITY)
+        posInfResult shouldBe JSON5Value.Number.PositiveInfinity
+
+        val negInfResult = JSON5Value.from(Double.NEGATIVE_INFINITY)
+        negInfResult shouldBe JSON5Value.Number.NegativeInfinity
+
+        val nanResult = JSON5Value.from(Double.NaN)
+        nanResult shouldBe JSON5Value.Number.NaN
+    }
+
+    /**
+     * Tests the toString() methods of various JSON5Value types.
+     */
+    @Test
+    fun `should have correct toString representations`() {
+        JSON5Value.Object(mapOf("key" to JSON5Value.String("value"))).toString() shouldBe "{key=\"value\"}"
+        JSON5Value.Array(listOf(JSON5Value.Number.Decimal(1.0))).toString() shouldBe "[1.0]"
+        JSON5Value.String("hello").toString() shouldBe "\"hello\""
+        JSON5Value.Number.Integer(42L).toString() shouldBe "42"
+        JSON5Value.Number.Decimal(3.14).toString() shouldBe "3.14"
+        JSON5Value.Number.Hexadecimal(255L).toString() shouldBe "0xff"
+        JSON5Value.Number.PositiveInfinity.toString() shouldBe "Infinity"
+        JSON5Value.Number.NegativeInfinity.toString() shouldBe "-Infinity"
+        JSON5Value.Number.NaN.toString() shouldBe "NaN"
+        JSON5Value.Boolean(true).toString() shouldBe "true"
+        JSON5Value.Boolean(false).toString() shouldBe "false"
+        JSON5Value.Null.toString() shouldBe "null"
+    }
+
+    /**
+     * Tests that Boolean values are properly converted.
+     */
+    @Test
+    fun `should handle Boolean conversion from Kotlin boolean`() {
+        val trueResult = JSON5Value.from(true)
+        trueResult shouldBe JSON5Value.Boolean(true)
+
+        val falseResult = JSON5Value.from(false)
+        falseResult shouldBe JSON5Value.Boolean(false)
+    }
+
+    /**
+     * Tests conversion of nested Map structures.
+     */
+    @Test
+    fun `should handle nested Map conversion`() {
+        val nested = mapOf("outer" to mapOf("inner" to "value"))
+        val result = JSON5Value.from(nested)
+        result.shouldBeInstanceOf<JSON5Value.Object>()
+        val obj = result as JSON5Value.Object
+        obj.value["outer"].shouldBeInstanceOf<JSON5Value.Object>()
+        val innerObj = obj.value["outer"] as JSON5Value.Object
+        (innerObj.value["inner"] as JSON5Value.String).value shouldBe "value"
+    }
+
+    /**
+     * Tests that non-string keys in maps are skipped during conversion.
+     */
+    @Test
+    fun `should skip non-string keys in map conversion`() {
+        val mapWithNonStringKey = mapOf(1 to "value", "key" to "otherValue") as Map<Any?, Any?>
+        val result = JSON5Value.from(mapWithNonStringKey)
+        result.shouldBeInstanceOf<JSON5Value.Object>()
+        val obj = result as JSON5Value.Object
+        obj.value.size shouldBe 1
+        obj.value.containsKey("key") shouldBe true
+    }
 }
